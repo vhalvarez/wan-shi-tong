@@ -76,9 +76,22 @@ async function main() {
 
     console.log('Roles y usuarios creados exitosamente.');
 
-    // Crear libros con datos falsos
+    // Crear 20 categorías académicas
+    const categoryNames = [
+        'Psicología', 'Arte', 'Ciencia', 'Historia', 'Literatura', 'Matemáticas', 'Física', 'Química', 'Biología',
+        'Ingeniería', 'Medicina', 'Derecho', 'Economía', 'Filosofía', 'Sociología', 'Educación', 'Antropología',
+        'Geografía', 'Lingüística', 'Política'
+    ];
+
+    const categories = await Promise.all(
+        categoryNames.map(name => prisma.categories.create({ data: { name } }))
+    );
+
+    console.log('Categorías creadas exitosamente.');
+
+    // Crear 500 libros con datos falsos y asignar categorías aleatorias
     const books = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 500; i++) {
         books.push(
             prisma.books.create({
                 data: {
@@ -89,7 +102,8 @@ async function main() {
                     genero: faker.lorem.word(),
                     cantidad_disponible: faker.number.int({ min: 1, max: 10 }),
                     cantidad_total: faker.number.int({ min: 5, max: 20 }),
-                    portada: faker.image.urlPicsumPhotos(),
+                    portada: faker.image.urlPicsumPhotos({height: 500, width: 400}),
+                    categoryId: categories[faker.number.int({ min: 0, max: categories.length - 1 })].id,
                 },
             })
         );
@@ -102,7 +116,7 @@ async function main() {
 
     // Crear préstamos con datos falsos
     const loans = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 230; i++) {
         loans.push(
             prisma.loans.create({
                 data: {
@@ -119,7 +133,7 @@ async function main() {
 
     // Crear reservas con datos falsos
     const reservations = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 365; i++) {
         reservations.push(
             prisma.reservations.create({
                 data: {
@@ -136,7 +150,7 @@ async function main() {
 
     // Crear multas con datos falsos
     const fines = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 100; i++) {
         fines.push(
             prisma.fines.create({
                 data: {

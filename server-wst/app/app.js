@@ -9,6 +9,7 @@ import loanRoutes from './routes/loans.js';
 import reservationRoutes from './routes/reservations.js';
 import fineRoutes from './routes/fines.js';
 import authRoutes from './routes/auth.js';
+import categoryRoutes from './routes/categories.js'
 import { authenticateToken, authorize } from './middleware/auth.js';
 import swaggerjsdoc from 'swagger-jsdoc'
 import swaggerui from 'swagger-ui-express'
@@ -27,6 +28,7 @@ app.use(express.json());
 // Rutas públicas
 app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes); 
+app.use('/api/categories', categoryRoutes); 
 
 // Middleware de autenticación para rutas protegidas
 app.use('/api/users', authenticateToken, authorize('view', 'manage'), userRoutes);

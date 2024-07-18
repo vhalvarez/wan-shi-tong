@@ -29,9 +29,17 @@ const router = express.Router();
  */
 // Ruta para obtener todos los libros (accesible para todos)
 router.get('/', async (req, res) => {
-    const books = await prisma.books.findMany();
+  try {
+    const books = await prisma.books.findMany({
+      include: {
+        category: true,
+      },
+    });
     res.json(books);
-  });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los libros' });
+  }
+});
 
 /**
  * @swagger
@@ -65,6 +73,8 @@ router.get('/', async (req, res) => {
  *                 type: integer
  *               portada:
  *                 type: string
+ *               categoryId:
+ *                 type: integer
  *             example:
  *               titulo: El Principito
  *               autor: Antoine de Saint-Exupéry
@@ -74,6 +84,7 @@ router.get('/', async (req, res) => {
  *               cantidad_disponible: 10
  *               cantidad_total: 20
  *               portada: https://example.com/portada.jpg
+ *               categoryId: 1
  *     responses:
  *       201:
  *         description: Libro creado
@@ -88,7 +99,8 @@ router.get('/', async (req, res) => {
  */
 // Ruta para crear un nuevo libro (solo para usuarios con el permiso "manage")
 router.post('/', authenticateToken, authorize('manage'), async (req, res) => {
-    const { titulo, autor, isbn, anio_publicacion, genero, cantidad_disponible, cantidad_total, portada } = req.body;
+  const { titulo, autor, isbn, anio_publicacion, genero, cantidad_disponible, cantidad_total, portada, categoryId } = req.body;
+  try {
     const book = await prisma.books.create({
       data: {
         titulo,
@@ -99,10 +111,14 @@ router.post('/', authenticateToken, authorize('manage'), async (req, res) => {
         cantidad_disponible,
         cantidad_total,
         portada,
+        categoryId,
       }
     });
     res.status(201).json(book);
-  });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al crear el libro' });
+  }
+});
 
 /**
  * @swagger
@@ -129,9 +145,21 @@ router.post('/', authenticateToken, authorize('manage'), async (req, res) => {
  */
 // Ruta para obtener un libro por ID (accesible para todos)
 router.get('/:id', async (req, res) => {
-    const book = await prisma.books.findUnique({ where: { id: Number(req.params.id) } });
+  try {
+    const book = await prisma.books.findUnique({
+      where: { id: Number(req.params.id) },
+      include: {
+        category: true,
+      },
+    });
+    if (!book) {
+      return res.status(404).json({ error: 'Libro no encontrado' });
+    }
     res.json(book);
-  });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el libro' });
+  }
+});
 
 /**
  * @swagger
@@ -172,6 +200,8 @@ router.get('/:id', async (req, res) => {
  *                 type: integer
  *               portada:
  *                 type: string
+ *               categoryId:
+ *                 type: integer
  *             example:
  *               titulo: El Principito
  *               autor: Antoine de Saint-Exupéry
@@ -181,6 +211,7 @@ router.get('/:id', async (req, res) => {
  *               cantidad_disponible: 10
  *               cantidad_total: 20
  *               portada: https://example.com/portada.jpg
+ *               categoryId: 1
  *     responses:
  *       200:
  *         description: Libro actualizado
@@ -195,7 +226,8 @@ router.get('/:id', async (req, res) => {
  */
 // Ruta para actualizar un libro por ID (solo para usuarios con el permiso "manage")
 router.put('/:id', authenticateToken, authorize('manage'), async (req, res) => {
-    const { titulo, autor, isbn, anio_publicacion, genero, cantidad_disponible, cantidad_total, portada } = req.body;
+  const { titulo, autor, isbn, anio_publicacion, genero, cantidad_disponible, cantidad_total, portada, categoryId } = req.body;
+  try {
     const book = await prisma.books.update({
       where: { id: Number(req.params.id) },
       data: {
@@ -207,10 +239,14 @@ router.put('/:id', authenticateToken, authorize('manage'), async (req, res) => {
         cantidad_disponible,
         cantidad_total,
         portada,
+        categoryId,
       }
     });
     res.json(book);
-  });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al actualizar el libro' });
+  }
+});
 
 /**
  * @swagger
@@ -235,8 +271,12 @@ router.put('/:id', authenticateToken, authorize('manage'), async (req, res) => {
  */
 // Ruta para eliminar un libro por ID (solo para usuarios con el permiso "manage")
 router.delete('/:id', authenticateToken, authorize('manage'), async (req, res) => {
+  try {
     await prisma.books.delete({ where: { id: Number(req.params.id) } });
     res.status(204).send();
-  });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el libro' });
+  }
+});
 
 export default router;

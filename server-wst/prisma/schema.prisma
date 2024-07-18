@@ -53,6 +53,12 @@ model RolesPermissions {
   @@unique([roleId, permissionId])
 }
 
+model Categories {
+  id           Int               @id @default(autoincrement())
+  name         String            @unique
+  books        Books[]
+}
+
 model Books {
   id                 Int          @id @default(autoincrement())
   titulo             String
@@ -63,6 +69,8 @@ model Books {
   cantidad_disponible Int         @default(0)
   cantidad_total     Int          @default(0)
   portada            String?
+  categoryId         Int
+  category           Categories    @relation(fields: [categoryId], references: [id])
   loans              Loans[]
   reservations       Reservations[]
 }
