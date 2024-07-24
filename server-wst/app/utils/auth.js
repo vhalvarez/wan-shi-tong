@@ -16,6 +16,7 @@ const checkAuthStatus = async (user) => {
             id: user.id,
             name: user.name,
             email: user.email,
+            cedula: user.cedula,
             fecha_registro: user.fecha_registro,
             roles: roles
         },

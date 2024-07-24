@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import bcrypt from 'bcrypt';
-import prisma from '../../prisma/client.js';
-import validatePassword from '../utils/validatePassword.js';
-import { authenticateToken, authorize } from '../middleware/auth.js';
+import { Router } from "express";
+import bcrypt from "bcrypt";
+import prisma from "../../prisma/client.js";
+import validatePassword from "../utils/validatePassword.js";
+import { authenticateToken, authorize } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -17,7 +17,7 @@ const router = Router();
  * @swagger
  * /users:
  *   get:
- *     summary: Obtener todos los usuarios
+ *     summary: Obtener todos los usuarios (solo administradores)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -31,29 +31,42 @@ const router = Router();
  *               items:
  *                 $ref: '#/components/schemas/User'
  */
-router.get('/', authenticateToken, authorize('manage'), async (req, res) => {
-  try {
-    const users = await prisma.users.findMany({
-      include: {
-        roles: {
-          include: {
-            role: true
-          }
+router.get("/", authenticateToken, authorize("manage"), async (req, res) => {
+    try {
+        if (!req.user.isAdmin) {
+            return res
+                .status(403)
+                .json({ error: "No tienes los permisos necesarios" });
         }
-      }
-    });
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al obtener los usuarios' });
-  }
+
+        const users = await prisma.users.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                cedula: true,
+                fecha_registro: true,
+                active: true,
+                roles: {
+                    select: {
+                        role: true,
+                    },
+                },
+            },
+        });
+
+        res.json(users);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener los usuarios" });
+    }
 });
 
 /**
  * @swagger
  * /users/{id}:
  *   get:
- *     summary: Obtener un usuario por ID
+ *     summary: Obtener un usuario por ID (administradores o el propio usuario)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -72,33 +85,47 @@ router.get('/', authenticateToken, authorize('manage'), async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/User'
  */
-router.get('/:id', authenticateToken, authorize('manage'), async (req, res) => {
-  try {
-    const user = await prisma.users.findUnique({
-      where: { id: parseInt(req.params.id) },
-      include: {
-        roles: {
-          include: {
-            role: true
-          }
+router.get("/:id", authenticateToken, authorize("view"), async (req, res) => {
+    try {
+        const user = await prisma.users.findUnique({
+            where: { id: parseInt(req.params.id) },
+            include: {
+                roles: {
+                    include: {
+                        role: true,
+                    },
+                },
+                loans: {
+                    include: {
+                        book: true,
+                    },
+                },
+                fines: true,
+            },
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
         }
-      }
-    });
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+
+        if (!req.user.isAdmin && user.id !== req.user.id) {
+            return res.status(403).json({
+                error: "No puedes acceder a la información de otro usuario",
+            });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener el usuario" });
     }
-    res.json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al obtener el usuario' });
-  }
 });
 
 /**
  * @swagger
  * /users/{id}:
  *   put:
- *     summary: Actualizar un usuario por ID
+ *     summary: Actualizar un usuario por ID (administradores o el propio usuario)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -134,68 +161,56 @@ router.get('/:id', authenticateToken, authorize('manage'), async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/User'
  */
-router.put('/:id', authenticateToken, authorize('manage'), async (req, res) => {
-  const { name, email, password, roles } = req.body;
-  try {
-    const user = await prisma.users.findUnique({
-      where: { id: parseInt(req.params.id) }
-    });
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
+router.put("/:id", authenticateToken, authorize("view"), async (req, res) => {
+    const { name, email, password } = req.body;
 
-    const updatedData = {
-      name: name || user.name,
-      email: email || user.email
-    };
-
-    if (password) {
-      if (!validatePassword(password)) {
-        return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial.' });
-      }
-      updatedData.password = await bcrypt.hash(password, 10);
-    }
-
-    if (roles && roles.length > 0) {
-      const userRoles = await prisma.roles.findMany({
-        where: {
-          name: {
-            in: roles
-          }
-        }
-      });
-      await prisma.usersRoles.deleteMany({
-        where: {
-          userId: user.id
-        }
-      });
-      for (const role of userRoles) {
-        await prisma.usersRoles.create({
-          data: {
-            userId: user.id,
-            roleId: role.id
-          }
+    try {
+        const user = await prisma.users.findUnique({
+            where: { id: parseInt(req.params.id) },
         });
-      }
+
+        if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        if (!req.user.isAdmin && user.id !== req.user.id) {
+            return res.status(403).json({
+                error: "No puedes editar la información de otro usuario",
+            });
+        }
+
+        const updatedData = {
+            name: name || user.name,
+            email: email || user.email,
+        };
+
+        if (password) {
+            if (!validatePassword(password)) {
+                return res.status(400).json({
+                    message:
+                        "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial.",
+                });
+            }
+            updatedData.password = await bcrypt.hash(password, 10);
+        }
+
+        const updatedUser = await prisma.users.update({
+            where: { id: parseInt(req.params.id) },
+            data: updatedData,
+        });
+
+        res.json(updatedUser);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al actualizar el usuario" });
     }
-
-    const updatedUser = await prisma.users.update({
-      where: { id: parseInt(req.params.id) },
-      data: updatedData
-    });
-
-    res.json(updatedUser);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al actualizar el usuario' });
-  }
 });
 
 /**
  * @swagger
  * /users/{id}:
  *   delete:
- *     summary: Desactivar un usuario por ID
+ *     summary: Desactivar un usuario por ID (solo administradores)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -217,20 +232,93 @@ router.put('/:id', authenticateToken, authorize('manage'), async (req, res) => {
  *                 message:
  *                   type: string
  */
-router.delete('/:id', authenticateToken, authorize('manage'), async (req, res) => {
-  try {
-    const user = await prisma.users.update({
-      where: { id: parseInt(req.params.id) },
-      data: { active: false }
-    });
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+router.delete(
+    "/:id",
+    authenticateToken,
+    authorize("manage"),
+    async (req, res) => {
+        try {
+            if (!req.user.isAdmin) {
+                return res
+                    .status(403)
+                    .json({ error: "No tienes los permisos necesarios" });
+            }
+
+            const user = await prisma.users.update({
+                where: { id: parseInt(req.params.id) },
+                data: { active: false },
+            });
+
+            if (!user) {
+                return res
+                    .status(404)
+                    .json({ message: "Usuario no encontrado" });
+            }
+
+            res.json({ message: "Usuario desactivado con éxito" });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error al desactivar el usuario" });
+        }
     }
-    res.json({ message: 'Usuario desactivado con éxito' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al desactivar el usuario' });
-  }
-});
+);
+
+/**
+ * @swagger
+ * /users/reactivate/{id}:
+ *   put:
+ *     summary: Reactivar un usuario por ID (solo administradores)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del usuario
+ *     responses:
+ *       200:
+ *         description: Usuario reactivado con éxito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error en el servidor
+ */
+router.put(
+    "/reactivate/:id",
+    authenticateToken,
+    authorize("manage"),
+    async (req, res) => {
+        try {
+            if (!req.user.isAdmin) {
+                return res
+                    .status(403)
+                    .json({ error: "No tienes los permisos necesarios" });
+            }
+
+            const user = await prisma.users.update({
+                where: { id: parseInt(req.params.id) },
+                data: { active: true },
+            });
+
+            if (!user) {
+                return res
+                    .status(404)
+                    .json({ message: "Usuario no encontrado" });
+            }
+
+            res.json({ message: "Usuario reactivado con éxito" });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error al reactivar el usuario" });
+        }
+    }
+);
 
 export default router;

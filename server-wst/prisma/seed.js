@@ -1,71 +1,84 @@
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
-import { faker } from '@faker-js/faker';
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+import { faker } from "@faker-js/faker";
 
 const prisma = new PrismaClient();
+
+function generateUniqueCedula(existingCedulas) {
+    let cedula;
+    do {
+        cedula = faker.number.int({ min: 1000000, max: 99999999 }).toString();
+    } while (existingCedulas.has(cedula));
+    existingCedulas.add(cedula);
+    return cedula;
+}
 
 async function main() {
     // Crear permisos
     const viewPermission = await prisma.permissions.create({
-        data: { name: 'view' }
+        data: { name: "view" },
     });
 
     const managePermission = await prisma.permissions.create({
-        data: { name: 'manage' }
+        data: { name: "manage" },
     });
 
     // Crear roles y asignar permisos
     const adminRole = await prisma.roles.create({
         data: {
-            name: 'Administrador',
+            name: "Administrador",
             permissions: {
                 create: [
                     { permission: { connect: { id: viewPermission.id } } },
-                    { permission: { connect: { id: managePermission.id } } }
-                ]
-            }
-        }
+                    { permission: { connect: { id: managePermission.id } } },
+                ],
+            },
+        },
     });
 
     const studentRole = await prisma.roles.create({
         data: {
-            name: 'Estudiante',
+            name: "Estudiante",
             permissions: {
                 create: [
-                    { permission: { connect: { id: viewPermission.id } } }
-                ]
-            }
-        }
+                    { permission: { connect: { id: viewPermission.id } } },
+                ],
+            },
+        },
     });
 
     // Crear usuarios y asignar roles
+    const existingCedulas = new Set();
     const users = await Promise.all([
         prisma.users.create({
             data: {
-                name: 'Student User',
-                email: 'student@example.com',
-                password: await bcrypt.hash('Student123!', 10), // Hashear la contraseña
+                name: "Student User",
+                email: "student@example.com",
+                password: await bcrypt.hash("Student123!", 10), // Hashear la contraseña
+                cedula: generateUniqueCedula(existingCedulas),
                 roles: {
-                    create: [{ roleId: studentRole.id }]
-                }
-            }
+                    create: [{ roleId: studentRole.id }],
+                },
+            },
         }),
         prisma.users.create({
             data: {
-                name: 'Admin User',
-                email: 'admin@example.com',
-                password: await bcrypt.hash('Admin123!', 10), // Hashear la contraseña
+                name: "Admin User",
+                email: "admin@example.com",
+                password: await bcrypt.hash("Admin123!", 10), // Hashear la contraseña
+                cedula: generateUniqueCedula(existingCedulas),
                 roles: {
-                    create: [{ roleId: adminRole.id }]
-                }
-            }
+                    create: [{ roleId: adminRole.id }],
+                },
+            },
         }),
         ...Array.from({ length: 10 }).map(async () =>
             prisma.users.create({
                 data: {
                     name: faker.person.fullName(),
                     email: faker.internet.email(),
-                    password: await bcrypt.hash('password', 10),
+                    password: await bcrypt.hash("password", 10),
+                    cedula: generateUniqueCedula(existingCedulas),
                     roles: {
                         create: [{ roleId: studentRole.id }],
                     },
@@ -74,24 +87,49 @@ async function main() {
         ),
     ]);
 
-    console.log('Roles y usuarios creados exitosamente.');
+    console.log("Roles y usuarios creados exitosamente.");
 
     // Crear 20 categorías académicas
     const categoryNames = [
-        'Psicología', 'Arte', 'Ciencia', 'Historia', 'Literatura', 'Matemáticas', 'Física', 'Química', 'Biología',
-        'Ingeniería', 'Medicina', 'Derecho', 'Economía', 'Filosofía', 'Sociología', 'Educación', 'Antropología',
-        'Geografía', 'Lingüística', 'Política'
+        "Psicología",
+        "Arte",
+        "Ciencia",
+        "Historia",
+        "Literatura",
+        "Matemáticas",
+        "Física",
+        "Química",
+        "Biología",
+        "Ingeniería",
+        "Medicina",
+        "Derecho",
+        "Economía",
+        "Filosofía",
+        "Sociología",
+        "Educación",
+        "Antropología",
+        "Geografía",
+        "Lingüística",
+        "Política",
     ];
 
     const categories = await Promise.all(
-        categoryNames.map(name => prisma.categories.create({ data: { name } }))
+        categoryNames.map((name) =>
+            prisma.categories.create({ data: { name } })
+        )
     );
 
-    console.log('Categorías creadas exitosamente.');
+    console.log("Categorías creadas exitosamente.");
 
     // Crear 500 libros con datos falsos y asignar categorías aleatorias
     const books = [];
     for (let i = 0; i < 500; i++) {
+        const cantidad_total = faker.number.int({ min: 5, max: 20 });
+        const cantidad_disponible = faker.number.int({
+            min: 1,
+            max: cantidad_total,
+        });
+
         books.push(
             prisma.books.create({
                 data: {
@@ -99,11 +137,16 @@ async function main() {
                     autor: faker.person.fullName(),
                     isbn: faker.string.uuid(),
                     anio_publicacion: faker.date.past().getFullYear(),
-                    genero: faker.lorem.word(),
-                    cantidad_disponible: faker.number.int({ min: 1, max: 10 }),
-                    cantidad_total: faker.number.int({ min: 5, max: 20 }),
-                    portada: faker.image.urlPicsumPhotos({height: 500, width: 400}),
-                    categoryId: categories[faker.number.int({ min: 0, max: categories.length - 1 })].id,
+                    cantidad_disponible,
+                    cantidad_total,
+                    portada: `https://picsum.photos/200/300`,
+                    categoryId:
+                        categories[
+                            faker.number.int({
+                                min: 0,
+                                max: categories.length - 1,
+                            })
+                        ].id,
                 },
             })
         );
@@ -116,14 +159,18 @@ async function main() {
 
     // Crear préstamos con datos falsos
     const loans = [];
-    for (let i = 0; i < 230; i++) {
+    for (let i = 0; i < 50; i++) {
         loans.push(
             prisma.loans.create({
                 data: {
                     fecha_prestamo: faker.date.past(),
-                    estado: 'prestado',
-                    userId: allUsers[faker.number.int({ min: 0, max: allUsers.length - 1 })].id,
-                    bookId: allBooks[faker.number.int({ min: 0, max: allBooks.length - 1 })].id,
+                    estado: "prestado",
+                    userId: allUsers[
+                        faker.number.int({ min: 0, max: allUsers.length - 1 })
+                    ].id,
+                    bookId: allBooks[
+                        faker.number.int({ min: 0, max: allBooks.length - 1 })
+                    ].id,
                 },
             })
         );
@@ -131,33 +178,18 @@ async function main() {
 
     await Promise.all(loans);
 
-    // Crear reservas con datos falsos
-    const reservations = [];
-    for (let i = 0; i < 365; i++) {
-        reservations.push(
-            prisma.reservations.create({
-                data: {
-                    fecha_reserva: faker.date.past(),
-                    estado: 'pendiente',
-                    userId: allUsers[faker.number.int({ min: 0, max: allUsers.length - 1 })].id,
-                    bookId: allBooks[faker.number.int({ min: 0, max: allBooks.length - 1 })].id,
-                },
-            })
-        );
-    }
-
-    await Promise.all(reservations);
-
     // Crear multas con datos falsos
     const fines = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 50; i++) {
         fines.push(
             prisma.fines.create({
                 data: {
                     monto: faker.number.float({ min: 1, max: 100 }),
                     pagada: faker.datatype.boolean(),
                     fecha_multa: faker.date.past(),
-                    userId: allUsers[faker.number.int({ min: 0, max: allUsers.length - 1 })].id,
+                    userId: allUsers[
+                        faker.number.int({ min: 0, max: allUsers.length - 1 })
+                    ].id,
                 },
             })
         );
@@ -165,7 +197,7 @@ async function main() {
 
     await Promise.all(fines);
 
-    console.log('Datos de ejemplo creados');
+    console.log("Datos de ejemplo creados");
 }
 
 main()

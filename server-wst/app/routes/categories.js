@@ -4,9 +4,17 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   name: Categories
+ *   description: Categorias de los libros
+ */
+
+/**
+ * @swagger
  * /categories:
  *   get:
  *     summary: Retrieve a list of categories
+ *     tags: [Categories]
  *     responses:
  *       200:
  *         description: A list of categories
@@ -22,7 +30,7 @@ const router = express.Router();
  *                   name:
  *                     type: string
  */
-router.get('/categories', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const categories = await prisma.categories.findMany();
         res.json(categories);
@@ -36,6 +44,7 @@ router.get('/categories', async (req, res) => {
  * /categories/{categoryId}/books:
  *   get:
  *     summary: Retrieve a list of books by category
+ *     tags: [Categories]
  *     parameters:
  *       - in: path
  *         name: categoryId
@@ -63,8 +72,6 @@ router.get('/categories', async (req, res) => {
  *                     type: string
  *                   anio_publicacion:
  *                     type: integer
- *                   genero:
- *                     type: string
  *                   cantidad_disponible:
  *                     type: integer
  *                   cantidad_total:
@@ -74,7 +81,7 @@ router.get('/categories', async (req, res) => {
  *                   categoryId:
  *                     type: integer
  */
-router.get('/categories/:categoryId/books', async (req, res) => {
+router.get('/:categoryId/books', async (req, res) => {
     const { categoryId } = req.params;
     try {
         const books = await prisma.books.findMany({
@@ -92,6 +99,7 @@ router.get('/categories/:categoryId/books', async (req, res) => {
  * /categories/{categoryId}/books/search:
  *   get:
  *     summary: Search books by title within a category
+ *     tags: [Categories]
  *     parameters:
  *       - in: path
  *         name: categoryId
@@ -125,8 +133,6 @@ router.get('/categories/:categoryId/books', async (req, res) => {
  *                     type: string
  *                   anio_publicacion:
  *                     type: integer
- *                   genero:
- *                     type: string
  *                   cantidad_disponible:
  *                     type: integer
  *                   cantidad_total:
@@ -136,25 +142,29 @@ router.get('/categories/:categoryId/books', async (req, res) => {
  *                   categoryId:
  *                     type: integer
  */
-router.get('/categories/:categoryId/books/search', async (req, res) => {
+router.get('/:categoryId/books/search', async (req, res) => {
     const { categoryId } = req.params;
     const { title } = req.query;
+  
+    console.log('categoryId:', categoryId);
+    console.log('title:', title);
+  
     try {
-        const books = await prisma.books.findMany({
-            where: {
-                categoryId: parseInt(categoryId),
-                titulo: {
-                    contains: title,
-                    mode: 'insensitive',
-                },
-            },
-            include: { category: true },
-        });
-        res.json(books);
+      const books = await prisma.books.findMany({
+        where: {
+          categoryId: parseInt(categoryId),
+          titulo: {
+            contains: title,
+            // mode: 'insensitive',
+          },
+        },
+        include: { category: true },
+      });
+      res.json(books);
     } catch (error) {
-        res.status(500).json({ error: 'Error al buscar los libros por categoría' });
+      console.error('Error al buscar los libros por categoría:', error);
+      res.status(500).json({ error: 'Error al buscar los libros por categoría' });
     }
-});
+  });
 
-
-export default router
+export default router;

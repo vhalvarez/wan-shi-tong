@@ -1,54 +1,77 @@
-import jwt from 'jsonwebtoken';
-import prisma from '../../prisma/client.js';
+import jwt from "jsonwebtoken";
+import prisma from "../../prisma/client.js";
 
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
 
-  if (token == null) {
-    return res.sendStatus(401);
-  }
+    if (token == null) return res.sendStatus(401);
 
-  jwt.verify(token, process.env.JWT_SECRET_key, (err, user) => {
-    if (err) {
-      return res.sendStatus(403);
-    }
+    jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, user) => {
+        if (err) return res.sendStatus(403);
 
-    // Asegurarse de que user.id esté presente
-    if (!user.id) {
-      return res.status(400).json({ message: 'Invalid token: userId is missing' });
-    }
+        req.user = user;
 
-    req.user = user;
-    next();
-  });
+        // Check if the user is an administrator
+        try {
+            const userRoles = await prisma.usersRoles.findMany({
+                where: { userId: user.id },
+                include: {
+                    role: true,
+                },
+            });
+
+            req.user.isAdmin = userRoles.some(
+                (userRole) => userRole.role.name === "Administrador"
+            );
+        } catch (error) {
+            return res
+                .status(500)
+                .json({ error: "Error al verificar roles del usuario" });
+        }
+
+        next();
+    });
 };
 
-const authorize = (...roles) => {
-  return async (req, res, next) => {
-    try {
-      const user = await prisma.users.findUnique({
-        where: { id: req.user.userId },
-        include: {
-          roles: {
-            include: {
-              role: true,
-            },
-          },
-        },
-      });
+const authorize = (requiredPermission) => {
+    return async (req, res, next) => {
+        const userId = req.user.id;
 
-      const userRoles = user.roles.map((role) => role.role.name);
-      if (!roles.some((role) => userRoles.includes(role))) {
-        return res.sendStatus(403);
-      }
+        try {
+            const userRoles = await prisma.usersRoles.findMany({
+                where: { userId },
+                include: {
+                    role: {
+                        include: {
+                            permissions: {
+                                include: {
+                                    permission: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
 
-      next();
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error al verificar permisos' });
-    }
-  };
+            const hasPermission = userRoles.some((userRole) =>
+                userRole.role.permissions.some(
+                    (rolePermission) =>
+                        rolePermission.permission.name === requiredPermission
+                )
+            );
+
+            if (!hasPermission) {
+                return res
+                    .status(403)
+                    .json({ error: "No tienes los permisos necesarios" });
+            }
+
+            next();
+        } catch (error) {
+            res.status(500).json({ error: "Error al verificar permisos" });
+        }
+    };
 };
 
 export { authenticateToken, authorize };

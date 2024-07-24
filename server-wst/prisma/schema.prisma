@@ -11,12 +11,12 @@ model Users {
   id              Int              @id @default(autoincrement())
   name            String
   email           String           @unique
+  cedula          String           @unique
   password        String
   fecha_registro  DateTime         @default(now())
   active          Boolean          @default(true)
   roles           UsersRoles[]
   loans           Loans[]
-  reservations    Reservations[]
   fines           Fines[]
 }
 
@@ -65,14 +65,12 @@ model Books {
   autor              String
   isbn               String       @unique
   anio_publicacion   Int?
-  genero             String?
   cantidad_disponible Int         @default(0)
   cantidad_total     Int          @default(0)
   portada            String?
   categoryId         Int
   category           Categories    @relation(fields: [categoryId], references: [id])
   loans              Loans[]
-  reservations       Reservations[]
 }
 
 model Loans {
@@ -80,16 +78,6 @@ model Loans {
   fecha_prestamo     DateTime     @default(now())
   fecha_devolucion   DateTime?
   estado             String       @default("prestado")
-  userId             Int
-  bookId             Int
-  user               Users         @relation(fields: [userId], references: [id])
-  book               Books         @relation(fields: [bookId], references: [id])
-}
-
-model Reservations {
-  id                 Int          @id @default(autoincrement())
-  fecha_reserva      DateTime     @default(now())
-  estado             String       @default("pendiente")
   userId             Int
   bookId             Int
   user               Users         @relation(fields: [userId], references: [id])

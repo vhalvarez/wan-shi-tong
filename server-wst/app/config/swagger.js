@@ -7,10 +7,17 @@ const swaggerDefinition = {
     },
     servers: [
         {
-            url: 'http://localhost:3000',
+            url: 'http://localhost:4000/api',
         },
     ],
     components: {
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+            },
+        },
         schemas: {
             Users: {
                 type: 'object',
@@ -28,10 +35,6 @@ const swaggerDefinition = {
                     loans: {
                         type: 'array',
                         items: { $ref: '#/components/schemas/Loans' },
-                    },
-                    reservations: {
-                        type: 'array',
-                        items: { $ref: '#/components/schemas/Reservations' },
                     },
                     fines: {
                         type: 'array',
@@ -104,7 +107,6 @@ const swaggerDefinition = {
                     autor: { type: 'string' },
                     isbn: { type: 'string' },
                     anio_publicacion: { type: 'integer' },
-                    genero: { type: 'string' },
                     cantidad_disponible: { type: 'integer' },
                     cantidad_total: { type: 'integer' },
                     portada: { type: 'string' },
@@ -114,10 +116,6 @@ const swaggerDefinition = {
                         type: 'array',
                         items: { $ref: '#/components/schemas/Loans' },
                     },
-                    reservations: {
-                        type: 'array',
-                        items: { $ref: '#/components/schemas/Reservations' },
-                    },
                 },
             },
             Loans: {
@@ -126,18 +124,6 @@ const swaggerDefinition = {
                     id: { type: 'integer' },
                     fecha_prestamo: { type: 'string', format: 'date-time' },
                     fecha_devolucion: { type: 'string', format: 'date-time' },
-                    estado: { type: 'string' },
-                    userId: { type: 'integer' },
-                    bookId: { type: 'integer' },
-                    user: { $ref: '#/components/schemas/Users' },
-                    book: { $ref: '#/components/schemas/Books' },
-                },
-            },
-            Reservations: {
-                type: 'object',
-                properties: {
-                    id: { type: 'integer' },
-                    fecha_reserva: { type: 'string', format: 'date-time' },
                     estado: { type: 'string' },
                     userId: { type: 'integer' },
                     bookId: { type: 'integer' },
