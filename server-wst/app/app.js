@@ -16,7 +16,6 @@ import swaggerDefinition from './config/swagger.js'
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-
 const app = express();
 const PORT = process.env.PORT || 4000;
 const URL = process.env.URL || 'http://localhost';
@@ -31,7 +30,6 @@ const __dirname = path.dirname(__filename);
 
 // Servir archivos estáticos desde el directorio 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 
 // Rutas públicas
 app.use('/api/auth', authRoutes);

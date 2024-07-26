@@ -1,94 +1,95 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+    provider = "mysql"
+    url      = env("DATABASE_URL")
 }
 
 model Users {
-  id              Int              @id @default(autoincrement())
-  name            String
-  email           String           @unique
-  cedula          String           @unique
-  password        String
-  fecha_registro  DateTime         @default(now())
-  active          Boolean          @default(true)
-  roles           UsersRoles[]
-  loans           Loans[]
-  fines           Fines[]
+    id             Int          @id @default(autoincrement())
+    name           String
+    email          String       @unique
+    cedula         String       @unique
+    password       String
+    fecha_registro DateTime     @default(now())
+    active         Boolean      @default(true)
+    roles          UsersRoles[]
+    loans          Loans[]
+    fines          Fines[]
 }
 
 model Roles {
-  id           Int               @id @default(autoincrement())
-  name         String            @unique
-  users        UsersRoles[]
-  permissions  RolesPermissions[]
+    id          Int                @id @default(autoincrement())
+    name        String             @unique
+    users       UsersRoles[]
+    permissions RolesPermissions[]
 }
 
 model Permissions {
-  id           Int               @id @default(autoincrement())
-  name         String            @unique // "view" or "manage"
-  roles        RolesPermissions[]
+    id    Int                @id @default(autoincrement())
+    name  String             @unique // "view" or "manage"
+    roles RolesPermissions[]
 }
 
 model UsersRoles {
-  id           Int               @id @default(autoincrement())
-  userId       Int
-  roleId       Int
-  user         Users              @relation(fields: [userId], references: [id])
-  role         Roles              @relation(fields: [roleId], references: [id])
+    id     Int   @id @default(autoincrement())
+    userId Int
+    roleId Int
+    user   Users @relation(fields: [userId], references: [id])
+    role   Roles @relation(fields: [roleId], references: [id])
 
-  @@unique([userId, roleId])
+    @@unique([userId, roleId])
 }
 
 model RolesPermissions {
-  id           Int               @id @default(autoincrement())
-  roleId       Int
-  permissionId Int
-  role         Roles            @relation(fields: [roleId], references: [id])
-  permission   Permissions       @relation(fields: [permissionId], references: [id])
+    id           Int         @id @default(autoincrement())
+    roleId       Int
+    permissionId Int
+    role         Roles       @relation(fields: [roleId], references: [id])
+    permission   Permissions @relation(fields: [permissionId], references: [id])
 
-  @@unique([roleId, permissionId])
+    @@unique([roleId, permissionId])
 }
 
 model Categories {
-  id           Int               @id @default(autoincrement())
-  name         String            @unique
-  books        Books[]
+    id    Int     @id @default(autoincrement())
+    name  String  @unique
+    books Books[]
 }
 
 model Books {
-  id                 Int          @id @default(autoincrement())
-  titulo             String
-  autor              String
-  isbn               String       @unique
-  anio_publicacion   Int?
-  cantidad_disponible Int         @default(0)
-  cantidad_total     Int          @default(0)
-  portada            String?
-  categoryId         Int
-  category           Categories    @relation(fields: [categoryId], references: [id])
-  loans              Loans[]
+    id                  Int        @id @default(autoincrement())
+    titulo              String
+    autor               String
+    isbn                String     @unique
+    anio_publicacion    Int
+    cantidad_disponible Int        @default(0)
+    cantidad_total      Int        @default(0)
+    portada             String
+    descripcion         String     @db.Text()
+    categoryId          Int
+    category            Categories @relation(fields: [categoryId], references: [id])
+    loans               Loans[]
 }
 
 model Loans {
-  id                 Int          @id @default(autoincrement())
-  fecha_prestamo     DateTime     @default(now())
-  fecha_devolucion   DateTime?
-  estado             String       @default("prestado")
-  userId             Int
-  bookId             Int
-  user               Users         @relation(fields: [userId], references: [id])
-  book               Books         @relation(fields: [bookId], references: [id])
+    id               Int       @id @default(autoincrement())
+    fecha_prestamo   DateTime  @default(now())
+    fecha_devolucion DateTime?
+    estado           String    @default("prestado")
+    userId           Int
+    bookId           Int
+    user             Users     @relation(fields: [userId], references: [id])
+    book             Books     @relation(fields: [bookId], references: [id])
 }
 
 model Fines {
-  id                 Int          @id @default(autoincrement())
-  monto              Float
-  pagada             Boolean      @default(false)
-  fecha_multa        DateTime     @default(now())
-  userId             Int
-  user               Users         @relation(fields: [userId], references: [id])
+    id          Int      @id @default(autoincrement())
+    monto       Float
+    pagada      Boolean  @default(false)
+    fecha_multa DateTime @default(now())
+    userId      Int
+    user        Users    @relation(fields: [userId], references: [id])
 }

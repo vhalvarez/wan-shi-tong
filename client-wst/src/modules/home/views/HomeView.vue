@@ -1,7 +1,50 @@
 <template>
-    <div>Hola View</div>
+    <div class="flex flex-col justify-center w-full">
+        <div v-if="!books" class="text-center h-[500px]">
+            <h1 class="text-xl">Cargando productos</h1>
+            <p>espere porfavor</p>
+        </div>
+
+        <BookList v-else :books="books" />
+
+        <ButtonPagination :has-more-data="!!books && books.length < 9" :page="page" />
+    </div>
 </template>
 
-<script setup></script>
+<script setup lang="ts">
+import { getBooksAction } from '@/modules/books/actions'
+import BookList from '@/modules/books/components/BookList.vue'
+import ButtonPagination from '@/modules/common/components/ButtonPagination.vue'
+import { useQueryClient, useQuery } from '@tanstack/vue-query'
+import { ref, watch, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 
-<style lang="scss" scoped></style>
+const route = useRoute()
+const page = ref(Number(route.query.page || 1))
+const queryClient = useQueryClient()
+
+const {
+    data: books = [],
+    isPending,
+    isLoading
+} = useQuery({
+    queryKey: ['books', { page: page }],
+    queryFn: () => getBooksAction(page.value)
+})
+
+watch(
+    () => route.query.page,
+    (newPage) => {
+        page.value = Number(newPage || 1)
+
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+)
+
+watchEffect(() => {
+    queryClient.prefetchQuery({
+        queryKey: ['books', { page: page.value + 1 }],
+        queryFn: () => getBooksAction(page.value + 1)
+    })
+})
+</script>

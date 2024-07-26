@@ -45,6 +45,7 @@
                         name="serch"
                         placeholder="Buscar libro..."
                         class="bg-secondary-content h-10 px-5 pr-10 rounded-md text-sm focus:outline-none w-full"
+                        autocomplete="true"
                     />
                     <button type="submit" class="absolute right-0 top-0 mt-3 mr-4">
                         <svg
@@ -71,7 +72,9 @@
             <div class="navbar-end gap-2">
                 <template v-if="!authStore.isAuthenticated">
                     <RouterLink :to="{ name: 'login' }">Ingresa</RouterLink>
-                    <RouterLink :to="{ name: 'register' }" class="btn btn-primary-content">Unete</RouterLink>
+                    <RouterLink :to="{ name: 'register' }" class="btn btn-primary-content"
+                        >Unete</RouterLink
+                    >
                 </template>
 
                 <template v-if="authStore.isAuthenticated">
@@ -89,9 +92,7 @@
                                 />
                             </div>
 
-                            <div>
-                                Hola
-                            </div>
+                            <div>Hola</div>
                         </div>
                         <ul
                             tabIndex="{0}"

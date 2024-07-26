@@ -59,30 +59,26 @@ function generateISBN() {
  */
 // Ruta para obtener todos los libros (accesible para todos)
 router.get("/", async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const { limit = 8, offset = 0 } = req.query;
 
     try {
-        const [books, totalBooks] = await Promise.all([
-            prisma.books.findMany({
-                skip,
-                take: limit,
-                include: {
-                    category: true,
-                },
-            }),
-            prisma.books.count(),
-        ]);
-
-        const totalPages = Math.ceil(totalBooks / limit);
-
-        res.json({
-            books,
-            page,
-            totalPages,
-            totalBooks,
+        const books = await prisma.books.findMany({
+            take: parseInt(limit),
+            skip: parseInt(offset),
+            include: {
+                category: true,
+            },
+            orderBy: {
+                id: "asc",
+            },
         });
+
+        const response = books.map((book) => ({
+            ...book,
+            category: book.category.name,
+        }));
+
+        res.json(response);
     } catch (error) {
         res.status(500).json({ error: "Error al obtener los libros" });
     }
@@ -152,6 +148,7 @@ router.post(
             cantidad_disponible,
             cantidad_total,
             categoryId,
+            descripcion,
         } = req.body;
 
         if (!req.file) {
@@ -174,6 +171,7 @@ router.post(
                     cantidad_total: parseInt(cantidad_total),
                     portada,
                     categoryId: parseInt(categoryId),
+                    descripcion,
                 },
                 include: {
                     category: true,
@@ -299,15 +297,40 @@ router.put(
             cantidad_disponible,
             cantidad_total,
             categoryId,
+            descripcion,
         } = req.body;
+
+        // Obtener el libro actual para mantener la descripción si no se proporciona una nueva
+        let currentBook;
+        try {
+            currentBook = await prisma.books.findUnique({
+                where: { id: Number(req.params.id) },
+            });
+            if (!currentBook) {
+                return res.status(404).json({ error: "Libro no encontrado" });
+            }
+        } catch (error) {
+            return res
+                .status(500)
+                .json({ error: "Error al obtener el libro actual" });
+        }
 
         const updatedData = {
             titulo,
             autor,
-            anio_publicacion,
-            cantidad_disponible,
-            cantidad_total,
-            categoryId,
+            anio_publicacion: anio_publicacion
+                ? parseInt(anio_publicacion)
+                : currentBook.anio_publicacion,
+            cantidad_disponible: cantidad_disponible
+                ? parseInt(cantidad_disponible)
+                : currentBook.cantidad_disponible,
+            cantidad_total: cantidad_total
+                ? parseInt(cantidad_total)
+                : currentBook.cantidad_total,
+            categoryId: categoryId
+                ? parseInt(categoryId)
+                : currentBook.categoryId,
+            descripcion: descripcion || currentBook.descripcion, // Mantener la descripción actual si no se proporciona una nueva
         };
 
         if (req.file) {

@@ -1,5 +1,4 @@
 <template>
-   
         <!-- Header Navbar -->
         <top-menu />
         
@@ -14,7 +13,7 @@
     
 </template>
 
-<script setup lang="ts">
+<script setup>
 import TopMenu from '../components/TopMenu.vue'
 import LeftMenu from '../components/LeftMenu.vue'
 import CustomFooter from '../components/CustomFooter.vue'

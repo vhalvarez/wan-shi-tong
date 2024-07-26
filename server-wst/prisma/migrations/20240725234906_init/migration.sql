@@ -66,10 +66,11 @@ CREATE TABLE `Books` (
     `titulo` VARCHAR(191) NOT NULL,
     `autor` VARCHAR(191) NOT NULL,
     `isbn` VARCHAR(191) NOT NULL,
-    `anio_publicacion` INTEGER NULL,
+    `anio_publicacion` INTEGER NOT NULL,
     `cantidad_disponible` INTEGER NOT NULL DEFAULT 0,
     `cantidad_total` INTEGER NOT NULL DEFAULT 0,
-    `portada` VARCHAR(191) NULL,
+    `portada` VARCHAR(191) NOT NULL,
+    `descripcion` VARCHAR(191) NOT NULL,
     `categoryId` INTEGER NOT NULL,
 
     UNIQUE INDEX `Books_isbn_key`(`isbn`),

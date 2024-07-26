@@ -17,12 +17,14 @@ export const registerAction = async (
   name: string,
   email: string,
   password: string,
+  cedula: string
 ): Promise<RegisterError | RegisterSuccess> => {
   try {
     const { data } = await wstApi.post<AuthResponse>('/auth/register', {
       name,
       email,
       password,
+      cedula
     });
 
     return {

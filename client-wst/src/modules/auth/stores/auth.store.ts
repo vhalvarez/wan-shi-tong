@@ -28,9 +28,9 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    const register = async (fullName: string, email: string, password: string) => {
+    const register = async (name: string, email: string, password: string, cedula: string) => {
         try {
-            const registerResponse = await registerAction(fullName, email, password)
+            const registerResponse = await registerAction(name, email, password, cedula)
 
             if (!registerResponse.ok) {
                 logout()

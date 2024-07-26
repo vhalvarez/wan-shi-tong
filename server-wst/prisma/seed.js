@@ -129,6 +129,8 @@ async function main() {
             min: 1,
             max: cantidad_total,
         });
+        const randomWidth = faker.number.int({ min: 600, max: 1200 });
+        const randomHeight = faker.number.int({ min: 600, max: 1200 });
 
         books.push(
             prisma.books.create({
@@ -139,7 +141,8 @@ async function main() {
                     anio_publicacion: faker.date.past().getFullYear(),
                     cantidad_disponible,
                     cantidad_total,
-                    portada: `https://picsum.photos/200/300`,
+                    portada: `https://picsum.photos/${randomWidth}/${randomHeight}`,
+                    descripcion: faker.lorem.paragraph(),
                     categoryId:
                         categories[
                             faker.number.int({
