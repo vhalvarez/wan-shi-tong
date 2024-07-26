@@ -62,7 +62,7 @@
             </template>
         </ul>
 
-        <ul className="menu bg-base-200 rounded-box w-56">
+        <ul className="menu bg-base-200 rounded-box w-56" v-if="!authStore.isAuthenticated">
             <template v-for="(section, index) in menu.guest" :key="index">
                 <li>
                     <h2 className="menu-title">{{ section.title }}</h2>
@@ -123,7 +123,7 @@ const menu = {
     admin: [
         {
             title: 'Inicio',
-            items: ['Ver Inicio']
+            items: ['Lista de Libros']
         },
         {
             title: 'Usuarios',
@@ -131,7 +131,7 @@ const menu = {
         },
         {
             title: 'Libros',
-            items: ['Lista de Libros', 'Agregar Nuevo Libro', ['Categorias'].concat(categories)]
+            items: ['Agregar Nuevo Libro', 'Editar un Libro', 'Eliminar un Libro', ['Categorias'].concat(categories)]
         },
         {
             title: 'Préstamos',
@@ -143,10 +143,6 @@ const menu = {
         }
     ],
     student: [
-        {
-            title: 'Inicio',
-            items: ['Ver Inicio']
-        },
         {
             title: 'Libros',
             items: ['Lista de Libros', ['Categorias'].concat(categories)]
@@ -162,14 +158,9 @@ const menu = {
     ],
     guest: [
         {
-            title: 'Inicio',
-            items: ['Ver Inicio']
-        },
-        {
             title: 'Libros',
             items: ['Lista de Libros', ['Categorias'].concat(categories)]
         }
     ]
 }
-
 </script>
