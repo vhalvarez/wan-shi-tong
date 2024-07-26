@@ -1,13 +1,14 @@
 <template>
     <div class="flex flex-col justify-center w-full">
         <div v-if="!books" class="text-center h-[500px]">
-            <h1 class="text-xl">Cargando productos</h1>
-            <p>espere porfavor</p>
+            <LoadingSpinner />
         </div>
 
-        <BookList v-else :books="books" />
+        <div v-else>
+            <BookList :books="books" />
 
-        <ButtonPagination :has-more-data="!!books && books.length < 9" :page="page" />
+            <ButtonPagination :has-more-data="!!books && books.length < 9" :page="page" />
+        </div>
     </div>
 </template>
 
@@ -18,6 +19,7 @@ import ButtonPagination from '@/modules/common/components/ButtonPagination.vue'
 import { useQueryClient, useQuery } from '@tanstack/vue-query'
 import { ref, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
+import LoadingSpinner from '../../common/components/LoadingSpinner.vue'
 
 const route = useRoute()
 const page = ref(Number(route.query.page || 1))

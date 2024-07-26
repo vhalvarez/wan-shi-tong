@@ -1,9 +1,9 @@
 import { authRoutes } from '@/modules/auth/routes'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeLayout from '@/modules/home/layouts/HomeLayout.vue'
-import { adminRoutes } from '@/modules/admin/routes'
 import HomeView from '@/modules/home/views/HomeView.vue'
 import NotFound404 from '@/modules/common/pages/NotFound404.vue'
+import { adminRoutes } from '@/modules/admin/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,7 +22,7 @@ const router = createRouter({
     },
 
     authRoutes,
-    // adminRoutes
+    adminRoutes,
 
     // Not Found
     {
