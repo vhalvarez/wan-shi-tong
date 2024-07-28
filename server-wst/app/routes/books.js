@@ -217,15 +217,21 @@ router.get("/:id", async (req, res) => {
                 category: true,
             },
         });
+
         if (!book) {
             return res.status(404).json({ error: "Libro no encontrado" });
         }
-        res.json(book);
+
+        const response = {
+            ...book,
+            category: book.category.name,
+        };
+
+        res.json(response);
     } catch (error) {
         res.status(500).json({ error: "Error al obtener el libro" });
     }
 });
-
 /**
  * @swagger
  * /books/{id}:

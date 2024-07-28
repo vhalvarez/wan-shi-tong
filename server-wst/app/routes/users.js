@@ -32,6 +32,8 @@ const router = Router();
  *                 $ref: '#/components/schemas/User'
  */
 router.get("/", authenticateToken, authorize("manage"), async (req, res) => {
+    const { limit = 8, offset = 0 } = req.query;
+
     try {
         if (!req.user.isAdmin) {
             return res
@@ -40,25 +42,32 @@ router.get("/", authenticateToken, authorize("manage"), async (req, res) => {
         }
 
         const users = await prisma.users.findMany({
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                cedula: true,
-                fecha_registro: true,
-                active: true,
+            take: parseInt(limit),
+            skip: parseInt(offset),
+            include: {
                 roles: {
                     select: {
-                        role: true,
+                        role: {
+                            select: {
+                                name: true,
+                            },
+                        },
                     },
                 },
             },
+            orderBy: {
+                id: "asc",
+            },
         });
 
-        res.json(users);
+        const response = users.map((user) => ({
+            ...user,
+            roles: user.roles.length > 0 ? user.roles[0].role.name : null,
+        }));
+
+        res.json(response);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al obtener los usuarios" });
+        res.status(500).json({ error: "Error al obtener los usuarios" });
     }
 });
 

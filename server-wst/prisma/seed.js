@@ -56,6 +56,7 @@ async function main() {
                 email: "student@example.com",
                 password: await bcrypt.hash("Student123!", 10), // Hashear la contraseña
                 cedula: generateUniqueCedula(existingCedulas),
+                active: true,
                 roles: {
                     create: [{ roleId: studentRole.id }],
                 },
@@ -67,24 +68,27 @@ async function main() {
                 email: "admin@example.com",
                 password: await bcrypt.hash("Admin123!", 10), // Hashear la contraseña
                 cedula: generateUniqueCedula(existingCedulas),
+                active: true,
                 roles: {
                     create: [{ roleId: adminRole.id }],
                 },
             },
         }),
-        ...Array.from({ length: 10 }).map(async () =>
-            prisma.users.create({
+        ...Array.from({ length: 50 }).map(async () => {
+            const isActive = faker.datatype.boolean(); // Generar true o false aleatoriamente
+            return prisma.users.create({
                 data: {
                     name: faker.person.fullName(),
                     email: faker.internet.email(),
                     password: await bcrypt.hash("password", 10),
                     cedula: generateUniqueCedula(existingCedulas),
+                    active: isActive,
                     roles: {
                         create: [{ roleId: studentRole.id }],
                     },
                 },
-            })
-        ),
+            });
+        }),
     ]);
 
     console.log("Roles y usuarios creados exitosamente.");

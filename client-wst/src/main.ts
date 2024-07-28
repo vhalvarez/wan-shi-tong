@@ -4,11 +4,14 @@ import { createPinia } from 'pinia';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 
 import Toast from "vue-toastification";
-// Import the CSS or use your own!
 import "vue-toastification/dist/index.css";
+import 'animate.css';
 
 import App from './App.vue';
 import router from './router';
+
+
+
 
 const app = createApp(App);
 

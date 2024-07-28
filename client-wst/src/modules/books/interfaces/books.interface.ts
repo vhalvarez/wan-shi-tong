@@ -7,6 +7,7 @@ export interface Book {
     cantidad_disponible: number;
     cantidad_total:      number;
     portada:             string;
+    descripcion:         string;
     categoryId:          number;
     category:            string;
 }
