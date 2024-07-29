@@ -106,7 +106,11 @@ router.get("/:id", authenticateToken, authorize("view"), async (req, res) => {
                 },
                 loans: {
                     include: {
-                        book: true,
+                        book: {
+                            include: {
+                                category: true,
+                            },
+                        },
                     },
                 },
                 fines: true,
@@ -123,7 +127,22 @@ router.get("/:id", authenticateToken, authorize("view"), async (req, res) => {
             });
         }
 
-        res.json(user);
+        // Formatear los roles para que sean un array de nombres de roles
+        const formattedUser = {
+            ...user,
+            roles: user.roles.map((roleAssignment) => roleAssignment.role.name),
+            loans: user.loans.map((loan) => ({
+                ...loan,
+                book: {
+                    ...loan.book,
+                    category: loan.book.category
+                        ? loan.book.category.name
+                        : null,
+                },
+            })),
+        };
+
+        res.json(formattedUser);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al obtener el usuario" });

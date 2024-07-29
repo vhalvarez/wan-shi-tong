@@ -1,39 +1,33 @@
 import { useQuery } from '@tanstack/vue-query'
 import { defineComponent, watchEffect } from 'vue'
+import { getUserByIdAction } from '../actions/get-users-by-id.action'
 import { useRouter } from 'vue-router'
-import { getBookByIdAction } from '../actions'
-import Breadcrumbs from '../components/Breadcrumbs.vue'
-
-import { useAuthStore } from '@/modules/auth/stores/auth.store'
-import LoadingSpinner from '@/modules/common/components/LoadingSpinner.vue'
 import { BellAlertIcon } from '@heroicons/vue/24/solid'
+import LoadingSpinner from '@/modules/common/components/LoadingSpinner.vue'
 import ButtonBack from '@/modules/common/components/ButtonBack.vue'
 
 export default defineComponent({
     components: {
-        Breadcrumbs,
         BellAlertIcon,
         LoadingSpinner,
         ButtonBack
     },
     props: {
-        bookId: {
+        userId: {
             type: String,
             required: true
         }
     },
+
     setup(props) {
         const router = useRouter()
-
-        const authStore = useAuthStore()
-
         const {
-            data: book,
+            data: user,
             isError,
             isLoading
         } = useQuery({
-            queryKey: ['book', props.bookId],
-            queryFn: () => getBookByIdAction(props.bookId),
+            queryKey: ['user', props.userId],
+            queryFn: () => getUserByIdAction(props.userId),
             retry: false
         })
 
@@ -43,12 +37,8 @@ export default defineComponent({
             }
         })
 
-
         return {
-            book,
-            isLoading,
-            authStore
-
+            user
         }
     }
 })

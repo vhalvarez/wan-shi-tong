@@ -1,7 +1,7 @@
 <template>
     <section class="text-gray-700 body-font overflow-hidden bg-white">
         <div class="container mx-auto mb-5">
-            <div v-if="!book" class=" text-center h-[500px]">
+            <div v-if="!book" class="text-center h-[500px]">
                 <LoadingSpinner />
             </div>
 
@@ -15,17 +15,18 @@
                 <div class="lg:w-4/5 mx-auto flex flex-wrap animate__animated animate__fadeIn">
                     <img
                         :alt="book.titulo"
-                        class="lg:w-1/2 w-full object-cover object-center rounded border border-gray-200 "
+                        class="lg:w-1/2 w-full object-cover object-center rounded border border-gray-200"
                         :src="book.portada"
                     />
                     <div class="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0">
-                        <h2 class="text-sm title-font text-gray-500 tracking-widest ">
+                        <ButtonBack />
+                        <h2 class="text-sm title-font text-gray-500 tracking-widest">
                             Por {{ book.autor }}
                         </h2>
-                        <h1 class="text-gray-900 text-3xl title-font font-medium mb-1 uppercase ">
+                        <h1 class="text-gray-900 text-3xl title-font font-medium mb-1 uppercase">
                             {{ book.titulo }}
                         </h1>
-                        <div class="flex mb-4 ">
+                        <div class="flex mb-4">
                             <span class="flex items-center">
                                 <svg
                                     fill="currentColor"
@@ -139,7 +140,7 @@
                                 </a>
                             </span>
                         </div>
-                        <p class="leading-relaxed ">{{ book.descripcion }}</p>
+                        <p class="leading-relaxed">{{ book.descripcion }}</p>
                         <div class="flex mt-6 items-center pb-5 border-b-2 border-gray-200 mb-5">
                             <div class="flex">
                                 <span class="mr-3 badge badge-neutral">{{ book.category }}</span>
