@@ -78,10 +78,10 @@
                 </template>
 
                 <template v-if="authStore.isAuthenticated">
-                    <!-- <RouterLink v-if="authStore.isAdmin" to="/admin">Admin</RouterLink>-->
-                    <div className="dropdown dropdown-end">
+                
+                    <div className="dropdown dropdown-end z-10">
                         <div
-                            tabIndex="{0}"
+                            tabIndex="{1}"
                             role="button"
                             className="btn btn-ghost btn-circle avatar flex"
                         >
@@ -95,7 +95,7 @@
                             <div>Hola</div>
                         </div>
                         <ul
-                            tabIndex="{0}"
+                            tabIndex="{1}"
                             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-4 shadow gap-4"
                         >
                             <li>
@@ -104,7 +104,7 @@
                                     <span className="badge">New</span>
                                 </a>
                             </li>
-                            <li><a>Settings</a></li>
+                            
                             <button @click="authStore.logout()" class="btn bg-error">Salir</button>
                         </ul>
                     </div>

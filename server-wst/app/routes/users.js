@@ -141,7 +141,9 @@ router.get("/:id", authenticateToken, authorize("view"), async (req, res) => {
                 ...loan,
                 book: {
                     ...loan.book,
-                    category: loan.book.category ? loan.book.category.name : null,
+                    category: loan.book.category
+                        ? loan.book.category.name
+                        : null,
                 },
             })),
         };
@@ -194,7 +196,7 @@ router.get("/:id", authenticateToken, authorize("view"), async (req, res) => {
  *               $ref: '#/components/schemas/User'
  */
 router.put("/:id", authenticateToken, authorize("view"), async (req, res) => {
-    const { name, email, password, cedula, role, active } = req.body;
+    const { name, email, password, cedula, roles, active } = req.body;
 
     try {
         const user = await prisma.users.findUnique({
@@ -234,16 +236,19 @@ router.put("/:id", authenticateToken, authorize("view"), async (req, res) => {
         const updatedUser = await prisma.users.update({
             where: { id: parseInt(req.params.id) },
             data: updatedData,
+            include: {
+                roles: true,
+            },
         });
 
-        if (role) {
+        if (roles) {
             const validRoles = ["Estudiante", "Administrador"];
-            if (!validRoles.includes(role)) {
+            if (!validRoles.includes(roles)) {
                 return res.status(400).json({ message: "Rol no válido" });
             }
 
             const roleRecord = await prisma.roles.findUnique({
-                where: { name: role },
+                where: { name: roles },
             });
 
             if (roleRecord) {
@@ -264,7 +269,27 @@ router.put("/:id", authenticateToken, authorize("view"), async (req, res) => {
             }
         }
 
-        res.json(updatedUser);
+        // Mapear roles a un formato más adecuado
+        const userRoles = await prisma.roles.findMany({
+            where: {
+                users: {
+                    some: {
+                        id: user.id,
+                    },
+                },
+            },
+        });
+
+        const responseUser = {
+            id: updatedUser.id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            cedula: updatedUser.cedula,
+            active: updatedUser.active,
+            roles: userRoles.map((role) => role.name), // Mapear roles al formato adecuado
+        };
+
+        res.json(responseUser);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al actualizar el usuario" });

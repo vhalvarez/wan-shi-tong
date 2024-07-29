@@ -173,7 +173,7 @@
                         </button>
 
                         <button
-                            v-else
+                            v-else-if="authStore.isAuthenticated && book.cantidad_disponible === 0"
                             className="btn btn-disabled w-full"
                             tabIndex="-1"
                             role="button"

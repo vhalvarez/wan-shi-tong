@@ -1,9 +1,9 @@
 <template>
     <main class="flex-1 md:p-0 lg:pt-8 lg:px-8 flex flex-col">
-        <div v-if="!user" class="text-center h-[500px]">
+        <!-- <div v-if="!user" class="text-center h-[500px]">
             <LoadingSpinner />
-        </div>
-        <section class="p-4" v-else>
+        </div> -->
+        <section class="p-4">
             <div class="flex justify-between py-4">
                 <ButtonBack :nameLink="'users-list'" />
                 <h3 class="flex justify-center w-full text-2xl text-yellow-400 font-bold">
@@ -13,18 +13,18 @@
 
             <div className="divider"></div>
 
-            <div class="md:flex">
-                <h2 class="md:w-1/3 uppercase tracking-wide text-sm sm:text-lg mb-6">
-                    Usuario:
-                    <span
-                        :class="
-                            user?.active ? 'font-bold text-green-500' : 'font-bold text-red-500'
-                        "
-                        >{{ user?.name }}</span
-                    >
-                </h2>
-            </div>
-            <form>
+            <form @submit="onSubmit">
+                <div class="md:flex">
+                    <h2 class="md:w-1/3 uppercase tracking-wide text-sm sm:text-lg mb-6">
+                        Usuario:
+                        <span
+                            :class="
+                                user?.active ? 'font-bold text-green-500' : 'font-bold text-red-500'
+                            "
+                            >{{ user?.name }}</span
+                        >
+                    </h2>
+                </div>
                 <div class="md:flex mb-8">
                     <div class="md:w-1/3">
                         <legend class="uppercase tracking-wide text-md">Información General</legend>
@@ -48,9 +48,7 @@
                                     required
                                 />
                             </div>
-                            <span v-if="errors.name" class="text-red-500">{{
-                                errors.name
-                            }}</span>
+                            <span v-if="errors.name" class="text-red-500">{{ errors.name }}</span>
                         </div>
                         <div class="mb-4">
                             <label class="flex items-center gap-2 my-2 font-bold">Correo</label>
@@ -174,12 +172,17 @@
 
                             <span v-if="errors.roles" class="text-red-500">{{ errors.roles }}</span>
                         </div>
+
+                        <div class="flex justify-center w-full my-4">
+                            <button class="btn btn-secondary w-full disabled:bg-gray-300" :disabled="isPending">Guardar</button>
+                        </div>
                     </div>
                 </div>
             </form>
         </section>
         <pre>{{ values }}</pre>
         <pre>{{ errors }}</pre>
+        <pre>{{ meta }}</pre>
     </main>
 </template>
 

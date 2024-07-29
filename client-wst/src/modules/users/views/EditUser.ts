@@ -1,17 +1,18 @@
-import { useQuery } from '@tanstack/vue-query'
+import { useMutation, useQuery } from '@tanstack/vue-query'
 import { defineComponent, watch, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
-import { getUserByIdAction } from '../actions'
+import { createUpdateUserAction, getUserByIdAction } from '../actions'
 import { useForm } from 'vee-validate'
 import ButtonBack from '@/modules/common/components/ButtonBack.vue'
 import * as yup from 'yup'
+import { useToast } from 'vue-toastification'
 
 const validationSchema = yup.object({
     email: yup
         .string()
         .required('El correo es obligatorio.')
         .email('Tiene que ser un email valido.'),
-    nombre: yup
+    name: yup
         .string()
         .required('El nombre es obligatorio.')
         .min(3, 'El nombre tiene que tener min 3 caracteres.'),
@@ -28,7 +29,12 @@ const validationSchema = yup.object({
         .min(7, 'La cedula tiene que tener min 7 caracteres.')
         .max(8, 'La cedula tiene que tener max 8 caracteres.')
         .required('La cedula es obligatorio.'),
-    roles: yup.string().oneOf(['Administrador', 'Estudiante'], "Tiene que elegir entre Estudiante o Administrador.")
+    roles: yup
+        .string()
+        .oneOf(
+            ['Administrador', 'Estudiante'],
+            'Tiene que elegir entre Estudiante o Administrador.'
+        )
 })
 
 export default defineComponent({
@@ -44,6 +50,7 @@ export default defineComponent({
 
     setup(props) {
         const router = useRouter()
+        const toast = useToast()
 
         const {
             data: user,
@@ -55,9 +62,18 @@ export default defineComponent({
             retry: false
         })
 
-        const { values, defineField, errors, handleSubmit, resetForm } = useForm({
-            validationSchema,
-            initialValues: user.value
+        const {
+            mutate,
+            isPending,
+            isSuccess: isUpdateSuccess,
+            data: updateUser
+        } = useMutation({
+            mutationFn: createUpdateUserAction
+        })
+
+        const { values, defineField, errors, handleSubmit, resetForm, meta } = useForm({
+            validationSchema
+            // initialValues: user.value
         })
 
         const [email, emailAttrs] = defineField('email')
@@ -67,8 +83,11 @@ export default defineComponent({
         const [active, activeAttrs] = defineField('active')
         const [roles, rolesAttrs] = defineField('roles')
 
-        const onSubmit = handleSubmit((value) => {
-            console.log({ value })
+        const onSubmit = handleSubmit(async (values) => {
+            // const user = await createUpdateUserAction(value)
+            // console.log({ user })
+
+            mutate(values)
         })
 
         watchEffect(() => {
@@ -92,10 +111,25 @@ export default defineComponent({
             }
         )
 
+        watch(isUpdateSuccess, (value) => {
+            if (!value) return
+
+            toast.success('Usuario actualizado correctamente')
+
+            // TODO: Redirrecion cuando se crea
+
+            resetForm({
+                values: updateUser.value
+            })
+        })
+
         return {
-            user,
             values,
             errors,
+            meta,
+            user,
+            isLoading,
+            isPending,
 
             email,
             emailAttrs,

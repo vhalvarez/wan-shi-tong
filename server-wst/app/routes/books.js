@@ -145,8 +145,7 @@ router.post(
             titulo,
             autor,
             anio_publicacion,
-            cantidad_disponible,
-            cantidad_total,
+            cantidad_total, // No se necesita cantidad_disponible en el cuerpo de la solicitud
             categoryId,
             descripcion,
         } = req.body;
@@ -167,7 +166,7 @@ router.post(
                     autor,
                     isbn,
                     anio_publicacion: parseInt(anio_publicacion),
-                    cantidad_disponible: parseInt(cantidad_disponible),
+                    cantidad_disponible: parseInt(cantidad_total), // Usar cantidad_total para cantidad_disponible
                     cantidad_total: parseInt(cantidad_total),
                     portada,
                     categoryId: parseInt(categoryId),

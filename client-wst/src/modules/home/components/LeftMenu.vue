@@ -93,59 +93,55 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue';
-import { useAuthStore } from '@/modules/auth/stores/auth.store';
-import { getCategoriesAction } from '@/modules/categories/actions/get-categories.action';
-import { useQuery } from '@tanstack/vue-query';
+import { ref, watchEffect } from 'vue'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { getCategoriesAction } from '@/modules/categories/actions/get-categories.action'
+import { useQuery } from '@tanstack/vue-query'
 
 interface Category {
-    id: number;
-    name: string;
+    id: number
+    name: string
 }
 
 interface MenuItem {
-    name: string;
-    link: string;
+    name: string
+    link: string
 }
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
 
 const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: () => getCategoriesAction(),
     initialData: []
-});
+})
 
 const formatCategories = (categories: Category[]): MenuItem[] => {
-    return categories.map(category => ({
+    return categories.map((category) => ({
         name: category.name,
         link: `/categories/${category.id}/books`
-    }));
-};
+    }))
+}
 
 const menu = ref({
     admin: [
         {
             title: 'Inicio',
-            items: [
-                { name: 'Lista de Libros', link: '/' }
-            ]
+            items: [{ name: 'Pantalla de inicio', link: '/' }]
         },
         {
             title: 'Usuarios',
             items: [
                 { name: 'Lista de Usuarios', link: '/admin/users' },
                 { name: 'Agregar Nuevo Usuario', link: '/admin/usuarios/nuevo' },
-                { name: 'Roles y Permisos', link: '/admin/roles' },
                 { name: 'Multas', link: '/admin/multas' }
             ]
         },
         {
             title: 'Libros',
             items: [
+                { name: 'Lista de Libros', link: '/admin/users' },
                 { name: 'Agregar Nuevo Libro', link: '/admin/libros/nuevo' },
-                { name: 'Editar un Libro', link: '/admin/libros/editar' },
-                { name: 'Eliminar un Libro', link: '/admin/libros/eliminar' },
                 ['Categorias']
             ]
         },
@@ -155,23 +151,12 @@ const menu = ref({
                 { name: 'Lista de Préstamos', link: '/admin/prestamos' },
                 { name: 'Agregar Nuevo Préstamo', link: '/admin/prestamos/nuevo' }
             ]
-        },
-        {
-            title: 'Reportes',
-            items: [
-                { name: 'Reporte de Préstamos', link: '/admin/reportes/prestamos' },
-                { name: 'Reporte de Multas', link: '/admin/reportes/multas' },
-                { name: 'Reporte de Reservas', link: '/admin/reportes/reservas' }
-            ]
         }
-    ] as { title: string, items: (string | MenuItem[])[] }[],
+    ] as { title: string; items: (string | MenuItem[])[] }[],
     student: [
         {
             title: 'Libros',
-            items: [
-                { name: 'Lista de Libros', link: '/student/libros' },
-                ['Categorias']
-            ]
+            items: [{ name: 'Lista de Libros', link: '/student/libros' }, ['Categorias']]
         },
         {
             title: 'Préstamos',
@@ -182,29 +167,24 @@ const menu = ref({
         },
         {
             title: 'Multas',
-            items: [
-                { name: 'Mis Multas', link: '/student/multas' }
-            ]
+            items: [{ name: 'Mis Multas', link: '/student/multas' }]
         }
-    ] as { title: string, items: (string | MenuItem[])[] }[],
+    ] as { title: string; items: (string | MenuItem[])[] }[],
     guest: [
         {
             title: 'Libros',
-            items: [
-                { name: 'Lista de Libros', link: '/guest/libros' },
-                ['Categorias']
-            ]
+            items: [{ name: 'Lista de Libros', link: '/' }, ['Categorias']]
         }
-    ] as { title: string, items: (string | MenuItem[])[] }[]
-});
+    ] as { title: string; items: (string | MenuItem[])[] }[]
+})
 
 watchEffect(() => {
-    const formattedCategories = formatCategories(categories.value);
-    const adminLibros = menu.value.admin.find(section => section.title === 'Libros');
+    const formattedCategories = formatCategories(categories.value)
+    const adminLibros = menu.value.admin.find((section) => section.title === 'Libros')
     if (adminLibros) {
-        adminLibros.items[3] = ['Categorias', ...formattedCategories];
+        adminLibros.items[2] = ['Categorias', ...formattedCategories]
     }
-    menu.value.student[0].items[1] = ['Categorias', ...formattedCategories];
-    menu.value.guest[0].items[1] = ['Categorias', ...formattedCategories];
-});
+    menu.value.student[0].items[1] = ['Categorias', ...formattedCategories]
+    menu.value.guest[0].items[1] = ['Categorias', ...formattedCategories]
+})
 </script>
