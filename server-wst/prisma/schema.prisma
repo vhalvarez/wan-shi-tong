@@ -79,6 +79,7 @@ model Loans {
     fecha_prestamo   DateTime  @default(now())
     fecha_devolucion DateTime?
     estado           String    @default("prestado")
+    
     userId           Int
     bookId           Int
     user             Users     @relation(fields: [userId], references: [id])

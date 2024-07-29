@@ -4,7 +4,14 @@
             <LoadingSpinner />
         </div>
         <section class="p-4" v-else>
-            <ButtonBack />
+
+            <div class="flex justify-between py-4">
+                <ButtonBack :nameLink="'users-list'"/>
+                <h3 class="flex justify-center w-full text-2xl text-secondary font-bold"> Información </h3>
+            </div>
+
+            <div className="divider"></div>
+            
             <div class="md:flex">
                 <h2 class="md:w-1/3 uppercase tracking-wide text-sm sm:text-lg mb-6">
                     Usuario:
@@ -62,6 +69,8 @@
                         </div>
                     </div>
                 </div>
+
+                <div className="divider"></div>
 
                 <div class="md:flex mb-8">
                     <div class="md:w-1/3">
@@ -140,6 +149,8 @@
                         </div>
                     </div>
                 </div>
+
+                <div className="divider"></div>
 
                 <div class="md:flex mb-8">
                     <div class="md:w-1/3">

@@ -190,11 +190,14 @@ router.get("/:id", authenticateToken, authorize("view"), async (req, res) => {
  *               $ref: '#/components/schemas/User'
  */
 router.put("/:id", authenticateToken, authorize("view"), async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, cedula, role, active } = req.body;
 
     try {
         const user = await prisma.users.findUnique({
             where: { id: parseInt(req.params.id) },
+            include: {
+                roles: true,
+            },
         });
 
         if (!user) {
@@ -210,13 +213,14 @@ router.put("/:id", authenticateToken, authorize("view"), async (req, res) => {
         const updatedData = {
             name: name || user.name,
             email: email || user.email,
+            cedula: cedula || user.cedula,
+            active: active || user.active,
         };
 
         if (password) {
             if (!validatePassword(password)) {
                 return res.status(400).json({
-                    message:
-                        "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial.",
+                    message: "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial.",
                 });
             }
             updatedData.password = await bcrypt.hash(password, 10);
@@ -226,6 +230,34 @@ router.put("/:id", authenticateToken, authorize("view"), async (req, res) => {
             where: { id: parseInt(req.params.id) },
             data: updatedData,
         });
+
+        if (role) {
+            const validRoles = ["Estudiante", "Administrador"];
+            if (!validRoles.includes(role)) {
+                return res.status(400).json({ message: "Rol no válido" });
+            }
+
+            const roleRecord = await prisma.roles.findUnique({
+                where: { name: role },
+            });
+
+            if (roleRecord) {
+                // Eliminar los roles actuales del usuario
+                await prisma.usersRoles.deleteMany({
+                    where: { userId: user.id },
+                });
+
+                // Asignar el nuevo rol al usuario
+                await prisma.usersRoles.create({
+                    data: {
+                        userId: user.id,
+                        roleId: roleRecord.id,
+                    },
+                });
+            } else {
+                return res.status(400).json({ message: "Rol no encontrado" });
+            }
+        }
 
         res.json(updatedUser);
     } catch (error) {
