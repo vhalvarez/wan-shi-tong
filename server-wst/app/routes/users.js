@@ -127,17 +127,21 @@ router.get("/:id", authenticateToken, authorize("view"), async (req, res) => {
             });
         }
 
-        // Formatear los roles para que sean un array de nombres de roles
+        // Excluir el campo de la contraseña del objeto de usuario
+        const { password, ...userWithoutPassword } = user;
+
+        // Obtener el nombre del primer rol
+        const roleName = user.roles.length > 0 ? user.roles[0].role.name : null;
+
+        // Formatear el objeto de usuario sin la contraseña y con el nombre del rol
         const formattedUser = {
-            ...user,
-            roles: user.roles.map((roleAssignment) => roleAssignment.role.name),
+            ...userWithoutPassword,
+            roles: roleName,
             loans: user.loans.map((loan) => ({
                 ...loan,
                 book: {
                     ...loan.book,
-                    category: loan.book.category
-                        ? loan.book.category.name
-                        : null,
+                    category: loan.book.category ? loan.book.category.name : null,
                 },
             })),
         };
@@ -220,7 +224,8 @@ router.put("/:id", authenticateToken, authorize("view"), async (req, res) => {
         if (password) {
             if (!validatePassword(password)) {
                 return res.status(400).json({
-                    message: "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial.",
+                    message:
+                        "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial.",
                 });
             }
             updatedData.password = await bcrypt.hash(password, 10);

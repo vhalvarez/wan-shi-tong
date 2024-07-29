@@ -32,66 +32,154 @@
                     <div class="md:flex-1 mt-2 mb:mt-0 md:px-3">
                         <div class="mb-4">
                             <label class="flex items-center gap-2 my-2 font-bold">Nombre </label>
-
-                            <input
-                                v-model="nombre"
-                                type="text"
-                                id="nombre"
-                                class="grow input input-bordered w-full flex items-center"
-                                placeholder="Tu nombre aqui"
-                                required
-                            />
+                            <div class="indicator w-full">
+                                <span class="indicator-item badge badge-accent">Obligatorio</span>
+                                <input
+                                    v-model="name"
+                                    v-bind="nameAttrs"
+                                    type="text"
+                                    id="name"
+                                    :class="[
+                                        'grow input input-bordered w-full flex items-center',
+                                        {
+                                            'border-red-500': errors.name
+                                        }
+                                    ]"
+                                    required
+                                />
+                            </div>
+                            <span v-if="errors.name" class="text-red-500">{{
+                                errors.name
+                            }}</span>
                         </div>
                         <div class="mb-4">
-                            <label class="flex items-center gap-2 my-2 font-bold">Correo </label>
-                            <input
-                                type="text"
-                                class="grow input input-bordered w-full flex items-center"
-                                placeholder="Tu nombre aqui"
-                                required
-                            />
+                            <label class="flex items-center gap-2 my-2 font-bold">Correo</label>
+                            <div class="indicator w-full">
+                                <span class="indicator-item badge badge-accent">Obligatorio</span>
+                                <input
+                                    v-model="email"
+                                    v-bind="emailAttrs"
+                                    type="text"
+                                    :class="[
+                                        'grow input input-bordered w-full flex items-center',
+                                        {
+                                            'border-red-500': errors.email
+                                        }
+                                    ]"
+                                    required
+                                />
+                            </div>
+                            <span v-if="errors.email" class="text-red-500">{{ errors.email }}</span>
                         </div>
                         <div class="mb-4">
                             <label class="flex items-center gap-2 my-2 font-bold"
-                                >Contraseña
+                                >Nueva Contraseña
                             </label>
-                            <input
-                                type="text"
-                                class="grow input input-bordered w-full flex items-center"
-                                placeholder="Tu contra aqui"
-                                required
-                            />
+                            <div class="indicator w-full">
+                                <span class="indicator-item badge badge-primary"
+                                    >No obligatorio</span
+                                >
+                                <input
+                                    v-model="password"
+                                    v-bind="passwordAttrs"
+                                    type="password"
+                                    :class="[
+                                        'grow input input-bordered w-full flex items-center',
+                                        {
+                                            'border-red-500': errors.password
+                                        }
+                                    ]"
+                                />
+                            </div>
+                            <span v-if="errors.password" class="text-red-500">{{
+                                errors.password
+                            }}</span>
                         </div>
                         <div class="md:flex mb-4">
                             <div class="md:flex-1 md:pr-3">
                                 <label class="flex items-center gap-2 my-2 font-bold">Cédula</label>
-                                <input
-                                    type="text"
-                                    class="grow input input-bordered w-full flex items-center"
-                                    placeholder="Tu nombre aqui"
-                                    required
-                                />
+                                <div class="indicator w-full">
+                                    <span class="indicator-item badge badge-accent"
+                                        >Obligatorio</span
+                                    >
+                                    <input
+                                        v-model="cedula"
+                                        v-bind="cedulaAttrs"
+                                        type="text"
+                                        :class="[
+                                            'grow input input-bordered w-full flex items-center',
+                                            {
+                                                'border-red-500': errors.cedula
+                                            }
+                                        ]"
+                                        placeholder="Tu nombre aqui"
+                                        required
+                                    />
+                                </div>
+                                <span v-if="errors.cedula" class="text-red-500">{{
+                                    errors.cedula
+                                }}</span>
                             </div>
                             <div class="md:flex-1 md:pl-3">
                                 <label class="flex items-center gap-2 my-2 font-bold">Estado</label>
-                                <select className="select w-full select-bordered">
-                                    <option disabled selected>Seleccionar...</option>
-                                    <option>Activo</option>
-                                    <option>Inactivo</option>
-                                </select>
+
+                                <div class="indicator w-full">
+                                    <span class="indicator-item badge badge-accent"
+                                        >Obligatorio</span
+                                    >
+                                    <select
+                                        v-model="active"
+                                        v-bind="activeAttrs"
+                                        :class="[
+                                            'select w-full select-bordered',
+                                            {
+                                                'border-red-500': errors.active
+                                            }
+                                        ]"
+                                    >
+                                        <option disabled selected>Seleccionar...</option>
+                                        <option value="true">Activo</option>
+                                        <option value="false">Inactivo</option>
+                                    </select>
+                                </div>
+
+                                <span v-if="errors.active" class="text-red-500">{{
+                                    errors.active
+                                }}</span>
                             </div>
                         </div>
-                        <div class="mb-4">
-                            <label class="flex items-center gap-2 my-2 font-bold">Rol</label>
-                            <p className="input input-bordered w-full flex items-center " disabled>
-                                {{ user?.roles[0] }}
-                            </p>
+
+                        <div class="md:flex-1">
+                            <label class="flex items-center gap-2 my-2 font-bold">Roles</label>
+
+                            <div class="indicator w-full">
+                                <span class="indicator-item badge badge-primary"
+                                    >No obligatorio</span
+                                >
+                                <select
+                                    :class="[
+                                        'select w-full select-bordered',
+                                        {
+                                            'border-red-500': errors.roles
+                                        }
+                                    ]"
+                                    v-model="roles"
+                                    v-bind="rolesAttrs"
+                                >
+                                    <option disabled selected>Seleccionar...</option>
+                                    <option value="Estudiante">Estudiante</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+
+                            <span v-if="errors.roles" class="text-red-500">{{ errors.roles }}</span>
                         </div>
                     </div>
                 </div>
             </form>
         </section>
         <pre>{{ values }}</pre>
+        <pre>{{ errors }}</pre>
     </main>
 </template>
 
