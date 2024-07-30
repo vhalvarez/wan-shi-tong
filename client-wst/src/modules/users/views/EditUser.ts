@@ -85,7 +85,7 @@ export default defineComponent({
 
         const onSubmit = handleSubmit(async (values) => {
             // const user = await createUpdateUserAction(value)
-            // console.log({ user })
+            // console.log({ values })
 
             mutate(values)
         })
@@ -112,7 +112,10 @@ export default defineComponent({
         )
 
         watch(isUpdateSuccess, (value) => {
-            if (!value) return
+            if (!value){
+                toast.error('Ocurrio un error al actualizar al usuario')
+                return
+            } 
 
             toast.success('Usuario actualizado correctamente')
 

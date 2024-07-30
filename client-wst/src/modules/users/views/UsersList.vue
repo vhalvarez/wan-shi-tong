@@ -4,7 +4,7 @@
             <LoadingSpinner />
         </div>
 
-        <div v-else class="">
+        <div v-else>
             <TableUsers :users="users" />
 
             <ButtonPagination :has-more-data="!!users && users.length < 9" :page="page" />

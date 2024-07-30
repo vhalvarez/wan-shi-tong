@@ -1,6 +1,6 @@
 <template>
-    <div className="overflow-x-auto">
-        <table className="table ">
+    <div class="overflow-x-auto">
+        <table class="table">
             <thead>
                 <tr>
                     <th></th>
@@ -25,14 +25,18 @@
                     </td>
                     <td>{{ user.roles }}</td>
                     <td class="flex gap-2">
-                        <router-link :to="{path: `/users/${user.id}`}"><EyeIcon class="size-6 cursor-pointer text-blue-500"/></router-link>
+                        <router-link :to="{ path: `/users/${user.id}` }">
+                            <EyeIcon class="size-6 cursor-pointer text-blue-500" />
+                        </router-link>
 
-                        <router-link :to="{path: `/users/edit/${user.id}`}">
+                        <router-link :to="{ path: `/users/edit/${user.id}` }">
                             <PencilSquareIcon class="size-6 cursor-pointer text-yellow-500" />
                         </router-link>
 
-                       
-                        <router-link :to="{}"> <TrashIcon class="size-6 cursor-pointer text-red-500" /></router-link>
+                        <TrashIcon
+                            class="size-6 cursor-pointer text-red-500"
+                            @click="deleteUser(user.id)"
+                        />
                     </td>
                 </tr>
             </tbody>
@@ -53,12 +57,30 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { PencilSquareIcon, TrashIcon, EyeIcon } from '@heroicons/vue/24/solid'
 import type { User } from '../interfaces/users.interface'
+import { wstApi } from '@/api/wstApi'
+import { useToast } from 'vue-toastification'
+import { useRouter } from 'vue-router'
 
 interface Props {
     users: User[]
 }
 
 defineProps<Props>()
+
+const toast = useToast()
+const router = useRouter()
+
+const deleteUser = async (userId: number) => {
+    try {
+        await wstApi.delete(`/users/${userId}`)
+        // // Filtrar la lista de usuarios para eliminar el usuario eliminado
+        // users.value = users.value.filter((user) => user.id !== userId)
+        toast.success('Usuario desactivado correctamente.')
+    } catch (error) {
+        console.error('Error al eliminar el usuario:', error)
+    }
+}
 </script>

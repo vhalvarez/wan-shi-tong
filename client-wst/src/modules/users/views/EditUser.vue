@@ -180,9 +180,6 @@
                 </div>
             </form>
         </section>
-        <pre>{{ values }}</pre>
-        <pre>{{ errors }}</pre>
-        <pre>{{ meta }}</pre>
     </main>
 </template>
 

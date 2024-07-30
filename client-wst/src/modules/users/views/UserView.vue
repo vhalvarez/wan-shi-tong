@@ -64,7 +64,7 @@
                         <div class="mb-4">
                             <label class="flex items-center gap-2 my-2 font-bold">Rol</label>
                             <p className="input input-bordered w-full flex items-center " disabled>
-                                {{ user?.roles[0] }}
+                                {{ user?.roles }}
                             </p>
                         </div>
                     </div>
