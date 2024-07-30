@@ -133,8 +133,8 @@ const menu = ref({
             title: 'Usuarios',
             items: [
                 { name: 'Lista de Usuarios', link: '/admin/users' },
-                { name: 'Agregar Nuevo Usuario', link: '/admin/usuarios/nuevo' },
-                { name: 'Multas', link: '/admin/multas' }
+                
+                { name: 'Multas', link: '/admin/fines' }
             ]
         },
         {

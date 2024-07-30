@@ -25,11 +25,11 @@
                     </td>
                     <td>{{ user.roles }}</td>
                     <td class="flex gap-2">
-                        <router-link :to="{ path: `/users/${user.id}` }">
+                        <router-link :to="{ path: `users/${user.id}` }">
                             <EyeIcon class="size-6 cursor-pointer text-blue-500" />
                         </router-link>
 
-                        <router-link :to="{ path: `/users/edit/${user.id}` }">
+                        <router-link :to="{ path: `users/edit/${user.id}` }">
                             <PencilSquareIcon class="size-6 cursor-pointer text-yellow-500" />
                         </router-link>
 

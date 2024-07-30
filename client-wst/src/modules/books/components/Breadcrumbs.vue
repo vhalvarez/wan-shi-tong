@@ -3,7 +3,9 @@
         <ul>
             <li><RouterLink :to="{ name: 'home' }">Inicio</RouterLink></li>
             <li>
-                <a>{{ category }}</a>
+                <RouterLink :to="{ path: `/categories/${categoryId}/books` }">{{
+                    category
+                }}</RouterLink>
             </li>
             <li class="capitalize font-bold">{{ titulo }}</li>
         </ul>

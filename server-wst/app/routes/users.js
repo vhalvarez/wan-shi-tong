@@ -220,7 +220,7 @@ router.put("/:id", authenticateToken, authorize("view"), async (req, res) => {
             name: name || user.name,
             email: email || user.email,
             cedula: cedula || user.cedula,
-            active: active || user.active,
+            active: active === "true" ? true : active === "false" ? false : user.active,
         };
 
         if (password) {

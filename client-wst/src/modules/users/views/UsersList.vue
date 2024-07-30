@@ -5,6 +5,8 @@
         </div>
 
         <div v-else>
+            <CustomTitle :title="'Listado de Usuarios'" />
+
             <TableUsers :users="users" />
 
             <ButtonPagination :has-more-data="!!users && users.length < 9" :page="page" />
@@ -20,6 +22,7 @@ import LoadingSpinner from '@/modules/common/components/LoadingSpinner.vue'
 import { ref, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import ButtonPagination from '@/modules/common/components/ButtonPagination.vue'
+import CustomTitle from '@/modules/common/components/CustomTitle.vue'
 
 const route = useRoute()
 const page = ref(Number(route.query.page || 1))

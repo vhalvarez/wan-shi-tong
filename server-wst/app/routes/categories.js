@@ -83,16 +83,29 @@ router.get('/', async (req, res) => {
  */
 router.get('/:categoryId/books', async (req, res) => {
     const { categoryId } = req.params;
+    const { limit = 8, offset = 0 } = req.query;
+
     try {
         const books = await prisma.books.findMany({
             where: { categoryId: parseInt(categoryId) },
+            take: parseInt(limit),
+            skip: parseInt(offset),
             include: { category: true },
+            orderBy: { id: 'asc' },
         });
-        res.json(books);
+
+        const response = books.map(book => ({
+            ...book,
+            category: book.category.name,
+        }));
+
+        res.json(response);
     } catch (error) {
+        console.error('Error al obtener los libros por categoría:', error);
         res.status(500).json({ error: 'Error al obtener los libros por categoría' });
     }
 });
+
 
 /**
  * @swagger

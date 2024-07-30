@@ -5,6 +5,8 @@
         </div>
 
         <div v-else>
+            <CustomTitle :title="'Libros'" />
+
             <BookList :books="books" />
 
             <ButtonPagination :has-more-data="!!books && books.length < 9" :page="page" />
@@ -20,6 +22,7 @@ import { useQueryClient, useQuery } from '@tanstack/vue-query'
 import { ref, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import LoadingSpinner from '../../common/components/LoadingSpinner.vue'
+import CustomTitle from '@/modules/common/components/CustomTitle.vue'
 
 const route = useRoute()
 const page = ref(Number(route.query.page || 1))

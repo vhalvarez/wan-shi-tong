@@ -5,12 +5,14 @@ import { useRouter } from 'vue-router'
 import { BellAlertIcon } from '@heroicons/vue/24/solid'
 import LoadingSpinner from '@/modules/common/components/LoadingSpinner.vue'
 import ButtonBack from '@/modules/common/components/ButtonBack.vue'
+import CustomTitle from '@/modules/common/components/CustomTitle.vue'
 
 export default defineComponent({
     components: {
         BellAlertIcon,
         LoadingSpinner,
-        ButtonBack
+        ButtonBack,
+        CustomTitle
     },
     props: {
         userId: {

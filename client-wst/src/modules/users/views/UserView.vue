@@ -6,8 +6,8 @@
         <section class="p-4" v-else>
 
             <div class="flex justify-between py-4">
-                <ButtonBack :nameLink="'users-list'"/>
-                <h3 class="flex justify-center w-full text-2xl text-secondary font-bold"> Información </h3>
+                <ButtonBack :nameLink="'users-list'" />
+                <CustomTitle :title="'Información'" />
             </div>
 
             <div className="divider"></div>

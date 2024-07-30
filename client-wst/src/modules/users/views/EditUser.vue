@@ -6,9 +6,7 @@
         <section class="p-4">
             <div class="flex justify-between py-4">
                 <ButtonBack :nameLink="'users-list'" />
-                <h3 class="flex justify-center w-full text-2xl text-yellow-400 font-bold">
-                    Editar
-                </h3>
+                <CustomTitle :title="'Editar Usuario'" />
             </div>
 
             <div className="divider"></div>
@@ -174,7 +172,12 @@
                         </div>
 
                         <div class="flex justify-center w-full my-4">
-                            <button class="btn btn-secondary w-full disabled:bg-gray-300" :disabled="isPending">Guardar</button>
+                            <button
+                                class="btn btn-secondary w-full disabled:bg-gray-300"
+                                :disabled="isPending"
+                            >
+                                Guardar
+                            </button>
                         </div>
                     </div>
                 </div>

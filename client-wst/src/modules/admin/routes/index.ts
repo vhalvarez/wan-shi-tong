@@ -15,17 +15,24 @@ export const adminRoutes: RouteRecordRaw = {
             component: UsersList
         },
         {
-            path: '/users/:userId',
+            path: 'users/:userId',
             name: 'user-id',
             props: true,
             component: () => import('@/modules/users/views/UserView.vue'),
         },
         {
-            path: '/users/edit/:userId',
+            path: 'users/edit/:userId',
             name: 'edit-user-id',
             props: true,
             component: () => import('@/modules/users/views/EditUser.vue'),
         },
+        {
+            path: 'fines',
+            name: 'fines-list',
+            props: true,
+            component: () => import('@/modules/fines/views/FinesView.vue'),
+        },
+
         
     ]
 }

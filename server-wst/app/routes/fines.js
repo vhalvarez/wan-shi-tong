@@ -30,19 +30,31 @@ const router = express.Router();
  *                 $ref: '#/components/schemas/Fine'
  */
 router.get("/", authenticateToken, authorize("view"), async (req, res) => {
+    const { limit = 8, offset = 0 } = req.query;
+
     try {
         let fines;
 
         if (req.user.isAdmin) {
-            // Si el usuario es administrador, obtiene todas las multas
+            // Si el usuario es administrador, obtiene todas las multas con paginación
             fines = await prisma.fines.findMany({
+                take: parseInt(limit),
+                skip: parseInt(offset),
                 include: { user: true },
+                orderBy: {
+                    id: "asc",
+                },
             });
         } else {
-            // Si el usuario no es administrador, obtiene solo sus multas
+            // Si el usuario no es administrador, obtiene solo sus multas con paginación
             fines = await prisma.fines.findMany({
                 where: { userId: req.user.id },
+                take: parseInt(limit),
+                skip: parseInt(offset),
                 include: { user: true },
+                orderBy: {
+                    id: "asc",
+                },
             });
         }
 
@@ -51,7 +63,7 @@ router.get("/", authenticateToken, authorize("view"), async (req, res) => {
         console.error("Error al obtener las multas:", error);
         res.status(500).json({ error: "Error al obtener las multas" });
     }
-});
+})
 
 /**
  * @swagger

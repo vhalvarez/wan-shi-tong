@@ -6,6 +6,7 @@ import { useForm } from 'vee-validate'
 import ButtonBack from '@/modules/common/components/ButtonBack.vue'
 import * as yup from 'yup'
 import { useToast } from 'vue-toastification'
+import CustomTitle from '@/modules/common/components/CustomTitle.vue'
 
 const validationSchema = yup.object({
     email: yup
@@ -39,7 +40,8 @@ const validationSchema = yup.object({
 
 export default defineComponent({
     components: {
-        ButtonBack
+        ButtonBack,
+        CustomTitle
     },
     props: {
         userId: {

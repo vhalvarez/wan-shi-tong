@@ -25,6 +25,12 @@ const router = createRouter({
                 props: true,
                 component: () => import('@/modules/books/views/BookView.vue'),
             },
+            {
+                path: '/categories/:categoryId/books',
+                name: 'category-books',
+                props: true,
+                component: () => import('@/modules/categories/views/CategoriesView.vue'),
+            },
         ],
     },
 
