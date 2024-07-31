@@ -59,6 +59,7 @@
             <tfoot>
                 <tr>
                     <th></th>
+                    <th>Estado</th>
                     <th>Monto</th>
                     <th>Fecha de la Multa</th>
                     <th>Nombre</th>

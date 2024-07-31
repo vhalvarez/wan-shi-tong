@@ -127,36 +127,33 @@ const menu = ref({
     admin: [
         {
             title: 'Inicio',
-            items: [{ name: 'Pantalla de inicio', link: '/' }]
+            items: [{ name: 'Libros', link: '/' }, ['Categorias']]
         },
         {
             title: 'Usuarios',
-            items: [
-                { name: 'Lista de Usuarios', link: '/admin/users' },
-                
-                { name: 'Multas', link: '/admin/fines' }
-            ]
+            items: [{ name: 'Lista de Usuarios', link: '/admin/users' }]
         },
+        {
+            title: 'Multas',
+            items: [{ name: 'Lista de Multas', link: '/admin/fines' }]
+        },
+
         {
             title: 'Libros',
             items: [
                 { name: 'Lista de Libros', link: '/admin/users' },
-                { name: 'Agregar Nuevo Libro', link: '/admin/libros/nuevo' },
-                ['Categorias']
+                { name: 'Agregar Nuevo Libro', link: '/admin/libros/nuevo' }
             ]
         },
         {
             title: 'Préstamos',
-            items: [
-                { name: 'Lista de Préstamos', link: '/admin/prestamos' },
-                { name: 'Agregar Nuevo Préstamo', link: '/admin/prestamos/nuevo' }
-            ]
+            items: [{ name: 'Lista de Préstamos', link: '/admin/loans' }]
         }
     ] as { title: string; items: (string | MenuItem[])[] }[],
     student: [
         {
-            title: 'Libros',
-            items: [{ name: 'Lista de Libros', link: '/student/libros' }, ['Categorias']]
+            title: 'Inicio',
+            items: [{ name: 'Libros', link: '/student/libros' }, ['Categorias']]
         },
         {
             title: 'Préstamos',
@@ -172,7 +169,7 @@ const menu = ref({
     ] as { title: string; items: (string | MenuItem[])[] }[],
     guest: [
         {
-            title: 'Libros',
+            title: 'Inicio',
             items: [{ name: 'Lista de Libros', link: '/' }, ['Categorias']]
         }
     ] as { title: string; items: (string | MenuItem[])[] }[]
@@ -180,9 +177,9 @@ const menu = ref({
 
 watchEffect(() => {
     const formattedCategories = formatCategories(categories.value)
-    const adminLibros = menu.value.admin.find((section) => section.title === 'Libros')
-    if (adminLibros) {
-        adminLibros.items[2] = ['Categorias', ...formattedCategories]
+    const adminInicio = menu.value.admin.find((section) => section.title === 'Inicio')
+    if (adminInicio) {
+        adminInicio.items[1] = ['Categorias', ...formattedCategories]
     }
     menu.value.student[0].items[1] = ['Categorias', ...formattedCategories]
     menu.value.guest[0].items[1] = ['Categorias', ...formattedCategories]

@@ -32,6 +32,12 @@ export const adminRoutes: RouteRecordRaw = {
             props: true,
             component: () => import('@/modules/fines/views/FinesView.vue'),
         },
+        {
+            path: 'loans',
+            name: 'loans-list',
+            props: true,
+            component: () => import('@/modules/loans/views/LoansView.vue'),
+        },
 
         
     ]

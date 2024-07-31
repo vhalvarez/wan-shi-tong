@@ -30,12 +30,16 @@ const router = express.Router();
  *                 $ref: '#/components/schemas/Loan'
  */
 router.get("/", authenticateToken, async (req, res) => {
+    const { limit = 8, offset = 0 } = req.query;
+
     try {
         let loans;
 
         if (req.user.isAdmin) {
-            // Si el usuario es administrador, obtiene todos los préstamos
+            // Si el usuario es administrador, obtiene todos los préstamos con paginación
             loans = await prisma.loans.findMany({
+                take: parseInt(limit),
+                skip: parseInt(offset),
                 include: {
                     book: true,
                     user: {
@@ -48,11 +52,16 @@ router.get("/", authenticateToken, async (req, res) => {
                         },
                     },
                 },
+                orderBy: {
+                    id: "asc",
+                },
             });
         } else {
-            // Si el usuario no es administrador, obtiene solo sus préstamos
+            // Si el usuario no es administrador, obtiene solo sus préstamos con paginación
             loans = await prisma.loans.findMany({
                 where: { userId: req.user.id },
+                take: parseInt(limit),
+                skip: parseInt(offset),
                 include: {
                     book: true,
                     user: {
@@ -64,6 +73,9 @@ router.get("/", authenticateToken, async (req, res) => {
                             fecha_registro: true,
                         },
                     },
+                },
+                orderBy: {
+                    id: "asc",
                 },
             });
         }
@@ -192,7 +204,6 @@ router.post("/", authenticateToken, authorize("manage"), async (req, res) => {
                 name: true,
                 email: true,
                 cedula: true,
-                fecha_registro: true,
             },
         });
 
@@ -228,60 +239,6 @@ router.post("/", authenticateToken, authorize("manage"), async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al crear el préstamo" });
-    }
-});
-
-/**
- * @swagger
- * /loans/{id}:
- *   get:
- *     summary: Obtiene un préstamo por ID
- *     tags: [Loans]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID del préstamo
- *     responses:
- *       200:
- *         description: Préstamo encontrado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Loan'
- *       404:
- *         description: Préstamo no encontrado
- */
-router.get("/:id", authenticateToken, authorize("view"), async (req, res) => {
-    try {
-        const loan = await prisma.loans.findUnique({
-            where: { id: Number(req.params.id) },
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        cedula: true,
-                        fecha_registro: true,
-                    },
-                },
-                book: true,
-            },
-        });
-
-        if (!loan) {
-            return res.status(404).json({ message: "Préstamo no encontrado" });
-        }
-
-        res.json(loan);
-    } catch (error) {
-        console.error("Error al obtener el préstamo:", error);
-        res.status(500).json({ message: "Error al obtener el préstamo" });
     }
 });
 
@@ -339,38 +296,41 @@ router.get("/:id", authenticateToken, authorize("view"), async (req, res) => {
  *       500:
  *         description: Error en el servidor
  */
-router.put("/:id", authenticateToken, authorize("manage"), async (req, res) => {
-    const { fecha_devolucion, estado } = req.body;
-
-    const formattedFechaDevolucion = fecha_devolucion ? new Date(fecha_devolucion).toISOString() : null;
-
-    try {
-        const loan = await prisma.loans.update({
-            where: { id: Number(req.params.id) },
-            data: {
-                fecha_devolucion: formattedFechaDevolucion,
-                estado,
-            },
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        cedula: true,
-                        fecha_registro: true,
-                    },
+router.put(
+    "/:id/return",
+    authenticateToken,
+    authorize("manage"),
+    async (req, res) => {
+        try {
+            const loan = await prisma.loans.update({
+                where: { id: Number(req.params.id) },
+                data: {
+                    estado: "Devuelto",
+                    fecha_devolucion: new Date().toISOString(),
                 },
-                book: true,
-            },
-        });
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            cedula: true,
+                            fecha_registro: true,
+                        },
+                    },
+                    book: true,
+                },
+            });
 
-        res.json(loan);
-    } catch (error) {
-        console.error("Error al actualizar el préstamo:", error);
-        res.status(500).json({ message: "Error al actualizar el préstamo" });
+            res.json(loan);
+        } catch (error) {
+            console.error("Error al actualizar el préstamo:", error);
+            res.status(500).json({
+                message: "Error al actualizar el préstamo",
+            });
+        }
     }
-});
+);
 
 /**
  * @swagger
@@ -399,9 +359,13 @@ router.delete(
     authorize("manage"),
     async (req, res) => {
         try {
-            const loan = await prisma.loans.delete({ where: { id: Number(req.params.id) } });
+            const loan = await prisma.loans.delete({
+                where: { id: Number(req.params.id) },
+            });
             if (!loan) {
-                return res.status(404).json({ message: "Préstamo no encontrado" });
+                return res
+                    .status(404)
+                    .json({ message: "Préstamo no encontrado" });
             }
             res.status(204).send();
         } catch (error) {
