@@ -87,12 +87,12 @@
                         >
                             <div className="w-10 rounded-full">
                                 <img
-                                    alt="Tailwind CSS Navbar component"
-                                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                                    alt="User image"
+                                    src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
                                 />
                             </div>
 
-                            <div>Hola</div>
+                        
                         </div>
                         <ul
                             tabIndex="{1}"

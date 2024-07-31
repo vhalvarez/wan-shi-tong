@@ -251,11 +251,8 @@ const onRegister = async () => {
             formData.cedula
         )
 
-        console.log(ok);
-        
-
         toast.success('Registro exitoso.')
-        console.log(formData)
+        
     } catch (error) {
         toast.error('Error en el registro.')
     } finally {

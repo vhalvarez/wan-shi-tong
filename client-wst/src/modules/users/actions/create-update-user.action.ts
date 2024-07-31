@@ -7,7 +7,6 @@ export const createUpdateUserAction = async (user: Partial<User>) => {
        
     }
 
-    // Crear Usuario
     throw new Error('No implementado')
 }
 
@@ -24,5 +23,3 @@ const updateUser = async (user: Partial<User>) => {
         throw new Error('Error updating user')
     }
 }
-
-const createUser = () => {}
