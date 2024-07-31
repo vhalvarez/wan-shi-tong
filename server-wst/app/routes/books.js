@@ -4,6 +4,9 @@ import { authenticateToken, authorize } from "../middleware/auth.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
@@ -76,6 +79,9 @@ router.get("/", async (req, res) => {
         const response = books.map((book) => ({
             ...book,
             category: book.category.name,
+            portada: book.portada
+                ? `${req.protocol}://${req.get("host")}${book.portada}`
+                : null,
         }));
 
         res.json(response);
@@ -156,7 +162,7 @@ router.post(
                 .json({ error: "La portada es obligatoria." });
         }
 
-        const portada = `/${req.file.path}`;
+        const portada = req.file ? `/uploads/${req.file.filename}` : null;
         const isbn = generateISBN();
 
         try {
@@ -224,6 +230,12 @@ router.get("/:id", async (req, res) => {
         const response = {
             ...book,
             category: book.category.name,
+            portada: book.portada
+                ? `${req.protocol}://${req.get("host")}${book.portada.replace(
+                      /\\/g,
+                      "/"
+                  )}`
+                : null,
         };
 
         res.json(response);
@@ -305,7 +317,6 @@ router.put(
             descripcion,
         } = req.body;
 
-        // Obtener el libro actual para mantener la descripción si no se proporciona una nueva
         let currentBook;
         try {
             currentBook = await prisma.books.findUnique({
@@ -335,11 +346,20 @@ router.put(
             categoryId: categoryId
                 ? parseInt(categoryId)
                 : currentBook.categoryId,
-            descripcion: descripcion || currentBook.descripcion, // Mantener la descripción actual si no se proporciona una nueva
+            descripcion: descripcion || currentBook.descripcion,
         };
 
         if (req.file) {
-            updatedData.portada = `/${req.file.path}`;
+            const oldImagePath = path.join(
+                __dirname,
+                "../..",
+                currentBook.portada
+            );
+            updatedData.portada = `/uploads/${req.file.filename}`;
+
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
         }
 
         try {
@@ -357,55 +377,23 @@ router.put(
     }
 );
 
-/**
- * @swagger
- * /books/{id}:
- *   delete:
- *     summary: Elimina un libro por ID
- *     tags: [Books]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID del libro
- *     responses:
- *       204:
- *         description: Libro eliminado
- *       404:
- *         description: Libro no encontrado
- */
-// Ruta para eliminar un libro por ID (solo para administradores)
-router.delete(
-    "/:id",
-    authenticateToken,
-    authorize("manage"),
-    async (req, res) => {
-        try {
-            const book = await prisma.books.findUnique({
-                where: { id: Number(req.params.id) },
-            });
+router.get("/books/search", async (req, res) => {
+    const { query } = req.query;
 
-            if (!book) {
-                return res.status(404).json({ error: "Libro no encontrado" });
-            }
-
-            const imagePath = path.join(__dirname, "../../", book.portada);
-
-            await prisma.books.delete({ where: { id: Number(req.params.id) } });
-
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath);
-            }
-
-            res.status(200).json({ message: "Libro eliminado correctamente." });
-        } catch (error) {
-            res.status(500).json({ error: "Error al eliminar el libro" });
-        }
+    try {
+        const books = await prisma.books.findMany({
+            where: {
+                OR: [
+                    { titulo: { contains: query, mode: "insensitive" } },
+                    { autor: { contains: query, mode: "insensitive" } },
+                ],
+            },
+        });
+        res.json(books);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al buscar libros" });
     }
-);
+});
 
 export default router;

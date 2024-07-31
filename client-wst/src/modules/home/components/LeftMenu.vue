@@ -1,5 +1,5 @@
 <template>
-    <div class="mb-5">
+    <div class="mb-5 hidden md:block">
         <ul
             class="menu bg-neutral-content rounded-box w-56"
             v-if="authStore.isAdmin && authStore.isAuthenticated"
@@ -76,7 +76,7 @@
                                             v-for="(subItem, subIdx) in item.slice(1)"
                                             :key="subIdx"
                                         >
-                                            <a :href="subItem.link">{{ subItem.name }}</a>
+                                            <Router :href="subItem.link">{{ subItem.name }}</Router>
                                         </li>
                                     </ul>
                                 </details>
@@ -141,8 +141,7 @@ const menu = ref({
         {
             title: 'Libros',
             items: [
-                { name: 'Lista de Libros', link: '/admin/users' },
-                { name: 'Agregar Nuevo Libro', link: '/admin/libros/nuevo' }
+                { name: 'Lista de Libros', link: '/admin/books' },
             ]
         },
         {
@@ -153,18 +152,11 @@ const menu = ref({
     student: [
         {
             title: 'Inicio',
-            items: [{ name: 'Libros', link: '/student/libros' }, ['Categorias']]
+            items: [{ name: 'Libros', link: `/` }, ['Categorias']]
         },
         {
-            title: 'Préstamos',
-            items: [
-                { name: 'Mis Préstamos', link: '/student/prestamos' },
-                { name: 'Solicitar Préstamo', link: '/student/prestamos/nuevo' }
-            ]
-        },
-        {
-            title: 'Multas',
-            items: [{ name: 'Mis Multas', link: '/student/multas' }]
+            title: 'Perfil',
+            items: [{ name: 'Ver mi perfil', link: `/admin/users/${authStore.user?.id}` }]
         }
     ] as { title: string; items: (string | MenuItem[])[] }[],
     guest: [

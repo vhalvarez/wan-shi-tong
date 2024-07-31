@@ -193,7 +193,7 @@ router.get("/by-cedula/:cedula", authenticateToken, async (req, res) => {
  *       400:
  *         description: El usuario ya tiene un libro prestado
  */
-router.post("/", authenticateToken, authorize("manage"), async (req, res) => {
+router.post("/", authenticateToken, authorize("view"), async (req, res) => {
     const { cedula, bookId } = req.body;
 
     try {
@@ -226,11 +226,26 @@ router.post("/", authenticateToken, authorize("manage"), async (req, res) => {
             });
         }
 
+        // Verificar si el usuario tiene multas pendientes
+        const unpaidFine = await prisma.fines.findFirst({
+            where: {
+                userId: user.id,
+                pagada: false,
+            },
+        });
+
+        if (unpaidFine) {
+            return res.status(400).json({
+                message:
+                    "El usuario tiene multas pendientes y no puede solicitar un préstamo hasta que las pague.",
+            });
+        }
+
         // Crear el nuevo préstamo
         const loan = await prisma.loans.create({
             data: {
                 userId: user.id,
-                bookId,
+                bookId: Number(bookId),
                 fecha_prestamo: new Date(),
             },
         });

@@ -51,13 +51,19 @@
                         </button>
 
                         <div class="modal-action">
-                            <label for="my_modal_6" class="btn btn-outline btn-error w-full">Cancelar</label>
+                            <label for="my_modal_6" class="btn btn-outline btn-error w-full"
+                                >Cancelar</label
+                            >
                         </div>
                     </div>
                 </form>
             </div>
 
-            <TableFines :fines="fines" @fine-deleted="invalidateFinesQuery" @fine-paid="invalidateFinesQuery" />
+            <TableFines
+                :fines="fines"
+                @fine-deleted="invalidateFinesQuery"
+                @fine-paid="invalidateFinesQuery"
+            />
 
             <ButtonPagination :has-more-data="!!fines && fines.length < 9" :page="page" />
         </div>
@@ -134,15 +140,14 @@ const onCreateFine = async () => {
         const ok = await wstApi.post('/fines', { monto: myForm.monto, email: myForm.email })
 
         toast.success('Multa creada exitosamente.')
-        
+
         // Cerrar el modal
         if (modalToggle.value) {
-            modalToggle.value.checked = false;
+            modalToggle.value.checked = false
         }
 
         // Invalidar la consulta para actualizar la tabla
         queryClient.invalidateQueries(['fines', { page: page.value }])
-
     } catch (error) {
         toast.error('Error al crear la multa')
     } finally {

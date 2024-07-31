@@ -4,14 +4,13 @@
             <LoadingSpinner />
         </div>
         <section class="p-4" v-else>
-
             <div class="flex justify-between py-4">
-                <ButtonBack :nameLink="'users-list'" />
-                <CustomTitle :title="'Información'" />
+                <ButtonBack :nameLink="authStore.isAdmin ? 'users-list' : 'home'" />
+                <CustomTitle :title="authStore.isAdmin ? 'Información' : 'Mi Perfil'" />
             </div>
 
             <div className="divider"></div>
-            
+
             <div class="md:flex">
                 <h2 class="md:w-1/3 uppercase tracking-wide text-sm sm:text-lg mb-6">
                     Usuario:
@@ -61,7 +60,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-4" v-if="authStore.isAdmin">
                             <label class="flex items-center gap-2 my-2 font-bold">Rol</label>
                             <p className="input input-bordered w-full flex items-center " disabled>
                                 {{ user?.roles }}
@@ -96,10 +95,12 @@
                                                 <div class="avatar">
                                                     <div class="mask mask-squircle h-12 w-12">
                                                         <img
-                                                            :src="loan.book.portada"
+                                                            :src="`http://localhost:4000${loan.book.portada}`"
                                                             :alt="loan.book.titulo"
                                                         />
+                                                        
                                                     </div>
+                                                    
                                                 </div>
                                                 <div>
                                                     <div class="font-bold">

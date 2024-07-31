@@ -1,5 +1,5 @@
 <template>
-    <section class="text-gray-700 body-font overflow-hidden bg-white">
+    <section class="text-gray-700 body-font overflow-hidden bg-white p-4">
         <div class="container mx-auto mb-5">
             <div v-if="!book" class="text-center h-[500px]">
                 <LoadingSpinner />
@@ -168,6 +168,7 @@
                         <button
                             v-if="authStore.isAuthenticated && book.cantidad_disponible > 0"
                             class="text-white bg-secondary border-0 py-2 px-6 focus:outline-none hover:bg-blue-700 rounded btn w-full"
+                            @click="onCreateLoan"
                         >
                             Solicitar Prestamo
                         </button>
@@ -188,4 +189,6 @@
     </section>
 </template>
 
-<script src="./BookView.ts" lang="ts"></script>
+<script src="./BookView.ts" lang="ts">
+
+</script>

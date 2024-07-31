@@ -29,7 +29,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Servir archivos estáticos desde el directorio 'uploads'
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Rutas públicas
 app.use('/api/auth', authRoutes);
@@ -56,6 +56,7 @@ app.use("/api-docs", swaggerui.serve, swaggerui.setup(spacs))
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en ${URL}:${PORT} 🚀`);
     console.log(`📚 Documentación API disponible en http://localhost:${PORT}/api-docs 📚`);
+    console.log('Serving static files from:', path.join(__dirname, 'uploads'));
 });
 
 export default app;

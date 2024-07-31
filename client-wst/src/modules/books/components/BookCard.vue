@@ -1,7 +1,7 @@
 <template>
     <RouterLink :to="{ path: `/book/${book.id}` }">
         <div
-            class="bg-neutral-content rounded-xl overflow-hidden hover:scale-105 hover:shadow-2xl hover:bg-white transform duration-500 cursor-pointer"
+            class="bg-neutral-content rounded-xl overflow-hidden hover:scale-105 hover:shadow-2xl hover:bg-white transform duration-500 cursor-pointer z-0"
         >
             <div class="p-4">
                 <span
@@ -15,13 +15,9 @@
             </div>
             <div class="relative">
                 <img
-                    :src="
-                        book.portada
-                            ? book.portada
-                            : 'https://www.hachette.co.nz/graphics/CoverNotAvailable.jpg'
-                    "
+                    :src="book.portada"
                     :alt="book.titulo"
-                    class="h-[400px] object-cover"
+                    class="h-[400px] object-cover w-full"
                 />
             </div>
         </div>

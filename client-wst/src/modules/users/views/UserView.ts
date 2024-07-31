@@ -6,6 +6,7 @@ import { BellAlertIcon } from '@heroicons/vue/24/solid'
 import LoadingSpinner from '@/modules/common/components/LoadingSpinner.vue'
 import ButtonBack from '@/modules/common/components/ButtonBack.vue'
 import CustomTitle from '@/modules/common/components/CustomTitle.vue'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
 
 export default defineComponent({
     components: {
@@ -23,6 +24,9 @@ export default defineComponent({
 
     setup(props) {
         const router = useRouter()
+
+        const authStore = useAuthStore()
+
         const {
             data: user,
             isError,
@@ -40,7 +44,8 @@ export default defineComponent({
         })
 
         return {
-            user
+            user,
+            authStore
         }
     }
 })

@@ -3,11 +3,13 @@ import { defineStore } from 'pinia'
 import { AuthStatus, type User } from '../interfaces'
 import { loginAction, registerAction, checkAuthAction } from '../actions'
 import { useLocalStorage } from '@vueuse/core'
+import { useRouter } from 'vue-router'
 
 export const useAuthStore = defineStore('auth', () => {
     const authStatus = ref<AuthStatus>(AuthStatus.Checking)
     const user = ref<User | undefined>()
     const token = ref(useLocalStorage('token', ''))
+    const router = useRouter()
 
     const login = async (email: string, password: string) => {
         try {
@@ -50,7 +52,8 @@ export const useAuthStore = defineStore('auth', () => {
         authStatus.value = AuthStatus.unAuthenticated
         user.value = undefined
         token.value = ''
-        return false
+        // router.push({ name: 'home'})
+        return
     }
 
     const checkAuthStatus = async (): Promise<boolean> => {

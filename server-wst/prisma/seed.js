@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { faker } from "@faker-js/faker";
+import path from "path";
 
 const prisma = new PrismaClient();
 
@@ -133,8 +134,6 @@ async function main() {
             min: 1,
             max: cantidad_total,
         });
-        const randomWidth = faker.number.int({ min: 600, max: 1200 });
-        const randomHeight = faker.number.int({ min: 600, max: 1200 });
 
         books.push(
             prisma.books.create({
@@ -145,7 +144,7 @@ async function main() {
                     anio_publicacion: faker.date.past().getFullYear(),
                     cantidad_disponible,
                     cantidad_total,
-                    portada: `https://picsum.photos/${randomWidth}/${randomHeight}`,
+                    portada: `/uploads/CoverNotAvailable.jpg`,
                     descripcion: faker.lorem.paragraph(),
                     categoryId:
                         categories[

@@ -1,5 +1,5 @@
 <template>
-    <div class="container mx-auto sticky">
+    <div class="container mx-auto sticky z-10">
         <div class="navbar bg-primary md:rounded-xl md:my-4">
             <div class="navbar-start">
                 <div class="dropdown">
@@ -19,19 +19,37 @@
                             />
                         </svg>
                     </div>
+
+                    <!-- Menú responsive -->
                     <ul
                         tabindex="0"
-                        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+                        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
                     >
-                        <li><a>Item 1</a></li>
-                        <li>
-                            <a>Parent</a>
-                            <ul class="p-2">
-                                <li><a>Submenu 1</a></li>
-                                <li><a>Submenu 2</a></li>
-                            </ul>
-                        </li>
-                        <li><a>Item 3</a></li>
+                        <template v-for="(section, index) in currentMenu" :key="index">
+                            <li>
+                                <h2 class="menu-title">{{ section.title }}</h2>
+                                <ul>
+                                    <li v-for="(item, idx) in section.items" :key="idx">
+                                        <template v-if="Array.isArray(item) && item[0] === 'Categorias'">
+                                            <details>
+                                                <summary>{{ item[0] }}</summary>
+                                                <ul>
+                                                    <li
+                                                        v-for="(subItem, subIdx) in item.slice(1)"
+                                                        :key="subIdx"
+                                                    >
+                                                        <RouterLink :to="subItem.link">{{ subItem.name }}</RouterLink>
+                                                    </li>
+                                                </ul>
+                                            </details>
+                                        </template>
+                                        <template v-else>
+                                            <RouterLink :to="item.link">{{ item.name }}</RouterLink>
+                                        </template>
+                                    </li>
+                                </ul>
+                            </li>
+                        </template>
                     </ul>
                 </div>
                 <RouterLink :to="{ name: 'home' }">
@@ -39,72 +57,34 @@
                 </RouterLink>
             </div>
             <div class="navbar-center hidden lg:flex w-2/4">
-                <div class="relative text-primary form-control w-full">
-                    <input
-                        type="search"
-                        name="serch"
-                        placeholder="Buscar libro..."
-                        class="bg-secondary-content h-10 px-5 pr-10 rounded-md text-sm focus:outline-none w-full"
-                        autocomplete="true"
-                    />
-                    <button type="submit" class="absolute right-0 top-0 mt-3 mr-4">
-                        <svg
-                            class="h-4 w-4 fill-current"
-                            xmlns="http://www.w3.org/2000/svg"
-                            xmlns:xlink="http://www.w3.org/1999/xlink"
-                            version="1.1"
-                            id="Capa_1"
-                            x="0px"
-                            y="0px"
-                            viewBox="0 0 56.966 56.966"
-                            style="enable-background: new 0 0 56.966 56.966"
-                            xml:space="preserve"
-                            width="512px"
-                            height="512px"
-                        >
-                            <path
-                                d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z"
-                            />
-                        </svg>
-                    </button>
-                </div>
+                
             </div>
             <div class="navbar-end gap-2">
                 <template v-if="!authStore.isAuthenticated">
-                    <RouterLink :to="{ name: 'login' }">Ingresa</RouterLink>
+                    <RouterLink :to="{ name: 'login' }" class="">Ingresa</RouterLink>
                     <RouterLink :to="{ name: 'register' }" class="btn btn-primary-content"
                         >Unete</RouterLink
                     >
                 </template>
 
                 <template v-if="authStore.isAuthenticated">
-                
-                    <div className="dropdown dropdown-end z-10">
+                    <div class="dropdown dropdown-end z-10">
                         <div
-                            tabIndex="{1}"
+                            tabIndex="1"
                             role="button"
-                            className="btn btn-ghost btn-circle avatar flex"
+                            class="btn btn-ghost btn-circle avatar flex"
                         >
-                            <div className="w-10 rounded-full">
+                            <div class="w-10 rounded-full">
                                 <img
                                     alt="User image"
                                     src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
                                 />
                             </div>
-
-                        
                         </div>
                         <ul
-                            tabIndex="{1}"
-                            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-4 shadow gap-4"
+                            tabIndex="1"
+                            class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-4 shadow gap-4"
                         >
-                            <li>
-                                <a className="justify-between">
-                                    Profile
-                                    <span className="badge">New</span>
-                                </a>
-                            </li>
-                            
                             <button @click="authStore.logout()" class="btn bg-error">Salir</button>
                         </ul>
                     </div>
@@ -114,8 +94,101 @@
     </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
+import { ref, watchEffect, computed } from 'vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { getCategoriesAction } from '@/modules/categories/actions/get-categories.action'
+import { useQuery } from '@tanstack/vue-query'
+import { RouterLink } from 'vue-router'
+
+interface Category {
+    id: number
+    name: string
+}
+
+interface MenuItem {
+    name: string
+    link: string
+}
 
 const authStore = useAuthStore()
+
+const { data: categories, isLoading } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: () => getCategoriesAction(),
+    initialData: []
+})
+
+const formatCategories = (categories: Category[]): MenuItem[] => {
+    return categories.map((category) => ({
+        name: category.name,
+        link: `/categories/${category.id}/books`
+    }))
+}
+
+const menu = ref({
+    admin: [
+        {
+            title: 'Inicio',
+            items: [{ name: 'Libros', link: '/' }, ['Categorias']]
+        },
+        {
+            title: 'Usuarios',
+            items: [{ name: 'Lista de Usuarios', link: '/admin/users' }]
+        },
+        {
+            title: 'Multas',
+            items: [{ name: 'Lista de Multas', link: '/admin/fines' }]
+        },
+        {
+            title: 'Libros',
+            items: [
+                { name: 'Lista de Libros', link: '/admin/users' },
+                { name: 'Agregar Nuevo Libro', link: '/admin/libros/nuevo' }
+            ]
+        },
+        {
+            title: 'Préstamos',
+            items: [{ name: 'Lista de Préstamos', link: '/admin/loans' }]
+        }
+    ] as { title: string; items: (string | MenuItem[])[] }[],
+    student: [
+        {
+            title: 'Inicio',
+            items: [{ name: 'Libros', link: `/` }, ['Categorias']]
+        },
+        {
+            title: 'Perfil',
+            items: [{ name: 'Ver mi perfil', link: `/admin/users/${authStore.user?.id}` }]
+        }
+    ] as { title: string; items: (string | MenuItem[])[] }[],
+    guest: [
+        {
+            title: 'Inicio',
+            items: [{ name: 'Lista de Libros', link: '/' }, ['Categorias']]
+        }
+    ] as { title: string; items: (string | MenuItem[])[] }[]
+})
+
+watchEffect(() => {
+    const formattedCategories = formatCategories(categories.value)
+    const adminInicio = menu.value.admin.find((section) => section.title === 'Inicio')
+    if (adminInicio) {
+        adminInicio.items[1] = ['Categorias', ...formattedCategories]
+    }
+    menu.value.student[0].items[1] = ['Categorias', ...formattedCategories]
+    menu.value.guest[0].items[1] = ['Categorias', ...formattedCategories]
+})
+
+const currentMenu = computed(() => {
+    if (authStore.isAuthenticated) {
+        if (authStore.isAdmin) {
+            return menu.value.admin
+        } else {
+            return menu.value.student
+        }
+    } else {
+        return menu.value.guest
+    }
+})
 </script>

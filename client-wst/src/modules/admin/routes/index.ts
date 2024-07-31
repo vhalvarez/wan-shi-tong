@@ -1,4 +1,5 @@
 import isAdminGuard from '@/modules/auth/guards/is-admin.guard'
+import isAuthenticatedGuard from '@/modules/auth/guards/is-authenticated.guard'
 import UsersList from '@/modules/users/views/UsersList.vue'
 import type { RouteRecordRaw } from 'vue-router'
 
@@ -18,12 +19,14 @@ export const adminRoutes: RouteRecordRaw = {
             path: 'users/:userId',
             name: 'user-id',
             props: true,
+            beforeEnter: [isAuthenticatedGuard],
             component: () => import('@/modules/users/views/UserView.vue'),
         },
         {
             path: 'users/edit/:userId',
             name: 'edit-user-id',
             props: true,
+            
             component: () => import('@/modules/users/views/EditUser.vue'),
         },
         {
@@ -37,6 +40,12 @@ export const adminRoutes: RouteRecordRaw = {
             name: 'loans-list',
             props: true,
             component: () => import('@/modules/loans/views/LoansView.vue'),
+        },
+        {
+            path: 'books',
+            name: 'books-list',
+            props: true,
+            component: () => import('@/modules/books/views/BookList.vue'),
         },
 
         
