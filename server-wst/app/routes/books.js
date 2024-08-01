@@ -377,23 +377,4 @@ router.put(
     }
 );
 
-router.get("/books/search", async (req, res) => {
-    const { query } = req.query;
-
-    try {
-        const books = await prisma.books.findMany({
-            where: {
-                OR: [
-                    { titulo: { contains: query, mode: "insensitive" } },
-                    { autor: { contains: query, mode: "insensitive" } },
-                ],
-            },
-        });
-        res.json(books);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al buscar libros" });
-    }
-});
-
-export default router;
+export default router

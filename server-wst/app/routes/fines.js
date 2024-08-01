@@ -168,6 +168,68 @@ router.delete(
     }
 );
 
+/**
+ * @swagger
+ * /fines/pay:
+ *   put:
+ *     summary: Pagar una multa
+ *     description: Actualiza el estado de una multa a pagada.
+ *     tags:
+ *       - Fines
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fineId
+ *             properties:
+ *               fineId:
+ *                 type: integer
+ *                 description: ID de la multa a pagar
+ *     responses:
+ *       200:
+ *         description: Multa actualizada correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 monto:
+ *                   type: number
+ *                 pagada:
+ *                   type: boolean
+ *                 fecha_multa:
+ *                   type: string
+ *                   format: date-time
+ *                 userId:
+ *                   type: integer
+ *       404:
+ *         description: Multa no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Multa no encontrada
+ *       500:
+ *         description: Error al actualizar la multa
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Error al actualizar la multa
+ */
 router.put("/pay", authenticateToken, authorize("manage"), async (req, res) => {
     const { fineId } = req.body;
 
@@ -194,6 +256,5 @@ router.put("/pay", authenticateToken, authorize("manage"), async (req, res) => {
         res.status(500).json({ error: "Error al actualizar la multa" });
     }
 });
-
 
 export default router;

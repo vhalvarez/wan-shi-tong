@@ -15,7 +15,6 @@ import swaggerui from 'swagger-ui-express'
 import swaggerDefinition from './config/swagger.js'
 import path from 'path';
 import { fileURLToPath } from 'url';
-
 const app = express();
 const PORT = process.env.PORT || 4000;
 const URL = process.env.URL || 'http://localhost';
@@ -56,7 +55,7 @@ app.use("/api-docs", swaggerui.serve, swaggerui.setup(spacs))
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en ${URL}:${PORT} 🚀`);
     console.log(`📚 Documentación API disponible en http://localhost:${PORT}/api-docs 📚`);
-    console.log('Serving static files from:', path.join(__dirname, 'uploads'));
+    // console.log('Serving static files from:', path.join(__dirname, 'uploads'));
 });
 
 export default app;
